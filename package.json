@@ -1,15 +1,25 @@
 {
   "name": "app",
   "version": "1.0.50",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@better-auth/drizzle-adapter": "^1.6.20",
+    "@elysiajs/cors": "^1.4.2",
+    "better-auth": "^1.6.20",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "elysia": "latest",
+    "pg": "^8.22.0"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/pg": "^8.20.0",
+    "bun-types": "latest",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.22.4"
   },
   "module": "src/index.js"
 }
