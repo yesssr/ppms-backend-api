@@ -29,16 +29,13 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/sign-up/email",
     ctrl.signUpEmail,
     {
+      body: emailPasswordBody,
       detail: {
         tags: ["Auth"],
         summary: "Register a new account",
         description:
           "Creates a new user account with email and password. " +
           "A verification email may be sent if email verification is enabled.",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: emailPasswordBody } },
-        },
         responses: {
           201: { description: "Account created" },
           400: errorResponse("Validation error or email already in use"),
@@ -53,13 +50,10 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/sign-in/email",
     ctrl.signInEmail,
     {
+      body: emailPasswordBody,
       detail: {
         tags: ["Auth"],
         summary: "Sign in with email and password",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: emailPasswordBody } },
-        },
         responses: {
           200: { description: "Signed in — session cookie set" },
           401: errorResponse("Invalid credentials"),
@@ -74,6 +68,7 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/sign-out",
     ctrl.signOut,
     {
+      body: t.Optional(t.Object({})),
       detail: {
         tags: ["Auth"],
         summary: "End the current session",
@@ -117,19 +112,12 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/forget-password",
     ctrl.forgetPassword,
     {
+      body: t.Object({
+        email: t.String({ format: "email", example: "user@example.com" }),
+      }),
       detail: {
         tags: ["Auth"],
         summary: "Request a password-reset email",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: t.Object({
-                email: t.String({ format: "email", example: "user@example.com" }),
-              }),
-            },
-          },
-        },
         responses: {
           200: { description: "Reset email sent if the account exists" },
         },
@@ -142,22 +130,15 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/reset-password",
     ctrl.resetPassword,
     {
+      body: t.Object({
+        token: t.String({ example: "abc123..." }),
+        newPassword: t.String({ minLength: 8, example: "n3wP@ss!" }),
+      }),
       detail: {
         tags: ["Auth"],
         summary: "Reset password with a valid token",
         description:
           "The token is received via the password-reset email. Provide the new password.",
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: t.Object({
-                token: t.String({ example: "abc123..." }),
-                newPassword: t.String({ minLength: 8, example: "n3wP@ss!" }),
-              }),
-            },
-          },
-        },
         responses: {
           200: { description: "Password reset successful" },
           400: errorResponse("Invalid or expired token"),
@@ -171,14 +152,14 @@ export const authRoutes = new Elysia({ prefix: "/api/auth" })
     "/verify-email",
     ctrl.verifyEmail,
     {
+      query: t.Object({
+        token: t.String({ example: "abc123..." }),
+      }),
       detail: {
         tags: ["Auth"],
         summary: "Verify an email address using a token",
         description:
           "The token is typically sent via email after registration. Pass it as a query parameter.",
-        query: t.Object({
-          token: t.String({ example: "abc123..." }),
-        }),
         responses: {
           200: { description: "Email verified" },
           400: errorResponse("Invalid or expired token"),

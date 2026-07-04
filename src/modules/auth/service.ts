@@ -22,5 +22,5 @@ export const getUserByEmail = async (email: string) => {
 /** Check whether a user exists by email. */
 export const userExists = async (email: string): Promise<boolean> => {
   const u = await getUserByEmail(email);
-  return u !== null;
+  return u != null; // loose equality — catches both null and undefined
 };
