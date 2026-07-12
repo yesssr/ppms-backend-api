@@ -3,16 +3,18 @@ import { cors } from "@elysiajs/cors";
 import { authPlugin } from "./modules/auth/auth.js";
 
 const main = () => {
-  const app = new Elysia()
-    .use(
-      cors({
-        origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        credentials: true,
-        allowedHeaders: ["Content-Type", "Authorization"],
-      })
-    )
-    .use(authPlugin);
+  const app = new Elysia();
+
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+
+  app.use(authPlugin);
 
   app.get("/health", () => ({
     status: "ok",
