@@ -1,0 +1,1 @@
+ALTER TABLE "document" ALTER COLUMN "uploaded_by" SET DATA TYPE text;

@@ -1,12 +1,11 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { config } from "../config/conf.js";
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = config.database.url;
 
-export const db = connectionString
-  ? drizzle({
-      connection: {
-        connectionString: connectionString,
-      },
-    })
-  : new Error("DATABASE_URL is not defined in the environment variables.");
+export const db = drizzle({
+  connection: {
+    connectionString: connectionString,
+  },
+});
