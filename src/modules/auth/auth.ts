@@ -3,15 +3,16 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "../../db/index.js";
 import * as authSchema from "./schema.js";
+import { config } from "../../config/conf.js";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL: config.auth.betterAuthUrl ?? "http://localhost:3000",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: authSchema,
   }),
-  trustedOrigins: [process.env.FRONTEND_URL ?? "http://localhost:5173"],
-  secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins: [config.app.FRONTEND_URL],
+  secret: config.auth.betterAuthSecret,
   emailAndPassword: {
     enabled: true,
   },
@@ -19,8 +20,13 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: true,
-        defaultValue: "intern",
+      },
+      departmentId: {
+        type: "string",
+        required: false,
+      },
+      isActive: {
+        type: "boolean",
       },
     },
   },

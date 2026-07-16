@@ -1,28 +1,29 @@
 import { relations } from "drizzle-orm";
 import {
   pgTable,
-  pgEnum,
   text,
   timestamp,
   boolean,
+  uuid,
   index,
 } from "drizzle-orm/pg-core";
-
-export const roleEnum = pgEnum("role", [
-  "admin",
-  "pm",
-  "developer",
-  "qa",
-  "client",
-  "intern",
-]);
+import { departments } from "../departements/schema.js";
+import { USER_ROLES } from "../../constant/enum.js";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
+  departmentId: uuid("department_id").references(() => departments.id, {
+    onDelete: "set null",
+  }),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  role: roleEnum("role").default("intern").notNull(),
+  role: text("role", {
+    enum: USER_ROLES,
+  })
+    .default("developer")
+    .notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
   image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -90,9 +91,13 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)]
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
+  department: one(departments, {
+    fields: [user.departmentId],
+    references: [departments.id],
+  }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
