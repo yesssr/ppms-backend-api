@@ -6,7 +6,7 @@ import * as authSchema from "./schema.js";
 import { config } from "../../config/conf.js";
 
 export const auth = betterAuth({
-  baseURL: config.auth.betterAuthUrl ?? "http://localhost:3000",
+  baseURL: config.auth.betterAuthUrl ?? `http://localhost:${config.app.PORT}`,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: authSchema,
@@ -15,6 +15,7 @@ export const auth = betterAuth({
   secret: config.auth.betterAuthSecret,
   emailAndPassword: {
     enabled: true,
+    disableSignUp: true,
   },
   user: {
     additionalFields: {
@@ -32,19 +33,6 @@ export const auth = betterAuth({
   },
 });
 
-export const authPlugin = new Elysia({ name: "better-auth" })
-  .mount(auth.handler)
-  .macro({
-    auth: {
-      async resolve({ status, request: { headers } }) {
-        const session = await auth.api.getSession({
-          headers,
-        });
-        if (!session) return status(401);
-        return {
-          user: session.user,
-          session: session.session,
-        };
-      },
-    },
-  });
+export const authPlugin = new Elysia({ name: "better-auth" }).mount(
+  auth.handler
+);
