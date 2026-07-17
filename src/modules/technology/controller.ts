@@ -6,7 +6,6 @@ import {
   updateTechnology as updateTechnologySvc,
   deleteTechnology as deleteTechnologySvc,
 } from "./service.js";
-import type { NewTechnology } from "./schema.js";
 import { getPaginationParams } from "../../utils/pagination.js";
 import { TECH_CATEGORIES } from "../../constant/enum.js";
 import type {
@@ -22,12 +21,13 @@ export async function listTechnologies(context: { query: TechnologyPaginationQue
       context.query.page,
       context.query.limit
     );
-    const result = await getTechnologies({ page, limit });
-    return successWithMeta(
-      result.data,
-      result.meta,
-      "Technologies retrieved successfully"
-    );
+    const result = await getTechnologies({
+      page,
+      limit,
+      search: context.query.search,
+      category: context.query.category,
+    });
+    return successWithMeta(result.data, result.meta, "Technologies retrieved successfully");
   } catch (err) {
     return error("Failed to retrieve technologies", "FETCH_TECHNOLOGIES_ERROR");
   }
@@ -51,7 +51,7 @@ export async function createTechnology(context: { body: TechnologyBody }) {
     if (!TECH_CATEGORIES.includes(body.category as (typeof TECH_CATEGORIES)[number])) {
       return error("Invalid technology category", "INVALID_TECHNOLOGY_CATEGORY");
     }
-    const technology = await createTechnologySvc(body as NewTechnology);
+    const technology = await createTechnologySvc(body);
     return success(technology, "Technology created successfully");
   } catch (err) {
     if (err instanceof Error && err.message.includes("unique")) {

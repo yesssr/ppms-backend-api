@@ -20,7 +20,12 @@ export async function listTasks(context: { query: TaskPaginationQuery }) {
       context.query.page,
       context.query.limit
     );
-    const result = await getTasks({ page, limit });
+    const result = await getTasks({
+      page,
+      limit,
+      search: context.query.search,
+      projectId: context.query.projectId,
+    });
     return successWithMeta(result.data, result.meta, "Tasks retrieved successfully");
   } catch (err) {
     return error("Failed to retrieve tasks", "FETCH_TASKS_ERROR");

@@ -1,10 +1,17 @@
-import { t } from "elysia";
-import type { NewProject } from "./schema.js";
+import { t, type TSchema } from "elysia";
 import { PROJECT_STATUS } from "../../constant/enum.js";
+
+const enumUnion = (values: readonly string[]) =>
+  t.Union(
+    values.map((v) => t.Literal(v)) as unknown as [TSchema, ...TSchema[]]
+  );
 
 export const projectPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),
   limit: t.Optional(t.Number({ minimum: 1, maximum: 100, default: 10 })),
+  search: t.Optional(t.String()),
+  serviceId: t.Optional(t.String({ format: "uuid" })),
+  status: t.Optional(enumUnion(PROJECT_STATUS)),
 });
 
 export const projectParams = t.Object({
@@ -20,7 +27,8 @@ export const projectBody = t.Object({
   repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
   demoUrl: t.Optional(t.String({ maxLength: 500 })),
   thumbnail: t.Optional(t.String({ maxLength: 500 })),
-  status: t.Union([t.Literal("planning"), t.Literal("in progress"), t.Literal("completed"), t.Literal("on hold")]),
+  thumbnailFile: t.Optional(t.File({ maxSize: 10 * 1024 * 1024 })),
+  status: enumUnion(PROJECT_STATUS),
   budget: t.Optional(t.String()),
   startDate: t.Optional(t.String()),
   endDate: t.Optional(t.String()),
@@ -37,7 +45,8 @@ export const updateProjectBody = t.Object({
   repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
   demoUrl: t.Optional(t.String({ maxLength: 500 })),
   thumbnail: t.Optional(t.String({ maxLength: 500 })),
-  status: t.Optional(t.Union([t.Literal("planning"), t.Literal("in progress"), t.Literal("completed"), t.Literal("on hold")])),
+  thumbnailFile: t.Optional(t.File({ maxSize: 10 * 1024 * 1024 })),
+  status: t.Optional(enumUnion(PROJECT_STATUS)),
   budget: t.Optional(t.String()),
   startDate: t.Optional(t.String()),
   endDate: t.Optional(t.String()),
@@ -46,7 +55,13 @@ export const updateProjectBody = t.Object({
   teamIds: t.Optional(t.Array(t.String({ format: "uuid" }))),
 });
 
+export const updateProjectProgressBody = t.Object({
+  progressPercentage: t.Number({ minimum: 0, maximum: 100 }),
+  message: t.Optional(t.String({ maxLength: 1000 })),
+});
+
 export type ProjectPaginationQuery = typeof projectPaginationQuery.$infer;
 export type ProjectParams = typeof projectParams.$infer;
 export type ProjectBody = typeof projectBody.$infer;
 export type UpdateProjectBody = typeof updateProjectBody.$infer;
+export type UpdateProjectProgressBody = typeof updateProjectProgressBody.$infer;

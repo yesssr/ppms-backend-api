@@ -20,7 +20,12 @@ export async function listTestimonials(context: { query: TestimonialPaginationQu
       context.query.page,
       context.query.limit
     );
-    const result = await getTestimonials({ page, limit });
+    const result = await getTestimonials({
+      page,
+      limit,
+      search: context.query.search,
+      status: context.query.status,
+    });
     return successWithMeta(result.data, result.meta, "Testimonials retrieved successfully");
   } catch (err) {
     return error("Failed to retrieve testimonials", "FETCH_TESTIMONIALS_ERROR");

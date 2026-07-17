@@ -6,7 +6,6 @@ import {
   updateService as updateServiceSvc,
   deleteService as deleteServiceSvc,
 } from "./service.js";
-import type { NewService } from "./schema.js";
 import { getPaginationParams } from "../../utils/pagination.js";
 import type {
   ServicePaginationQuery,
@@ -21,12 +20,12 @@ export async function listServices(context: { query: ServicePaginationQuery }) {
       context.query.page,
       context.query.limit
     );
-    const result = await getServices({ page, limit });
-    return successWithMeta(
-      result.data,
-      result.meta,
-      "Services retrieved successfully"
-    );
+    const result = await getServices({
+      page,
+      limit,
+      search: context.query.search,
+    });
+    return successWithMeta(result.data, result.meta, "Services retrieved successfully");
   } catch (err) {
     return error("Failed to retrieve services", "FETCH_SERVICES_ERROR");
   }

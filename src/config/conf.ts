@@ -16,6 +16,7 @@ export const config = {
     NODE_ENV: process.env.NODE_ENV ?? "development",
     PORT: Number(process.env.PORT) || 8080,
     FRONTEND_URL: process.env.FRONTEND_URL ?? "http://localhost:5173",
+    BACKEND_URL: process.env.BACKEND_URL ?? "http://localhost:8080",
   },
   database: {
     url: required("DATABASE_URL"),

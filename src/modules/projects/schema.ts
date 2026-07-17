@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, integer } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user } from "../auth/schema.js";
 import { services } from "../services/schema.js";
@@ -20,6 +20,8 @@ export const project = pgTable("project", {
   thumbnail: text("thumbnail"),
   code: text("code").unique(),
   status: text("status").notNull(),
+  progressPercentage: integer("progress_percentage").default(0).notNull(),
+  lastChange: timestamp("last_change").defaultNow().notNull(),
   budget: text("budget"),
   startDate: text("start_date"),
   endDate: text("end_date"),
@@ -104,9 +106,37 @@ export const projectTechnologyRelations = relations(projectTechnology, ({ one })
   }),
 }));
 
+// Resi-style progress history: every progress update is a tracked row so the
+// client can monitor the project timeline publicly (like checking a delivery).
+export const projectLog = pgTable("project_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => project.id, { onDelete: "cascade" }),
+  progressPercentage: integer("progress_percentage").notNull(),
+  message: text("message"),
+  updatedBy: text("updated_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const projectLogRelations = relations(projectLog, ({ one }) => ({
+  project: one(project, {
+    fields: [projectLog.projectId],
+    references: [project.id],
+  }),
+  updater: one(user, {
+    fields: [projectLog.updatedBy],
+    references: [user.id],
+  }),
+}));
+
 export type Project = typeof project.$inferSelect;
 export type NewProject = typeof project.$inferInsert;
 export type ProjectMember = typeof projectMember.$inferSelect;
 export type NewProjectMember = typeof projectMember.$inferInsert;
 export type ProjectTechnology = typeof projectTechnology.$inferSelect;
 export type NewProjectTechnology = typeof projectTechnology.$inferInsert;
+export type ProjectLog = typeof projectLog.$inferSelect;
+export type NewProjectLog = typeof projectLog.$inferInsert;

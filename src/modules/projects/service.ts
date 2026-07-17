@@ -3,10 +3,12 @@ import {
   project,
   projectMember,
   projectTechnology,
+  projectLog,
   NewProject,
   Project,
+  ProjectLog,
 } from "./schema.js";
-import { eq, count, and, sql, inArray } from "drizzle-orm";
+import { eq, count, and, sql, inArray, ilike } from "drizzle-orm";
 import { NotFoundError, ConflictError } from "../../utils/errors.js";
 import {
   PaginationParams,
@@ -20,13 +22,35 @@ import { teamMember } from "../teams/schema.js";
 export type { Project, NewProject } from "./schema.js";
 
 export const getProjects = async (
-  params: PaginationParams
+  params: PaginationParams & {
+    search?: string;
+    serviceId?: string;
+    status?: string;
+  }
 ): Promise<PaginatedResult<Project>> => {
   const offset = getPaginationOffset(params.page, params.limit);
 
+  const conditions = [];
+
+  if (params.search) {
+    conditions.push(
+      sql`${ilike(project.name, `%${params.search}%`)} OR ${ilike(project.clientName, `%${params.search}%`)}`
+    );
+  }
+
+  if (params.serviceId) {
+    conditions.push(eq(project.serviceId, params.serviceId));
+  }
+
+  if (params.status) {
+    conditions.push(eq(project.status, params.status));
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
   const [items, countResult] = await Promise.all([
-    db.select().from(project).limit(params.limit).offset(offset),
-    db.select({ count: count() }).from(project),
+    db.select().from(project).where(whereClause).limit(params.limit).offset(offset),
+    db.select({ count: count() }).from(project).where(whereClause),
   ]);
 
   const total = Number(countResult[0]?.count ?? 0);
@@ -46,6 +70,15 @@ export const getProjectById = async (id: string): Promise<Project> => {
   }
 
   return result;
+};
+
+export const generateProjectCode = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let suffix = "";
+  for (let i = 0; i < 6; i++) {
+    suffix += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `PRJ-${suffix}`;
 };
 
 export const createProject = async (data: {
@@ -68,6 +101,7 @@ export const createProject = async (data: {
   const [result] = await db
     .insert(project)
     .values({
+      code: generateProjectCode(),
       serviceId: data.serviceId,
       createdBy: data.createdBy,
       name: data.name,
@@ -175,14 +209,70 @@ export const updateProject = async (
 };
 
 export const deleteProject = async (id: string): Promise<void> => {
-  const [result] = await db
-    .delete(project)
-    .where(eq(project.id, id))
-    .returning();
+  const [result] = await db.delete(project).where(eq(project.id, id)).returning();
 
   if (!result) {
     throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
   }
+};
+
+// Developer updates progress. Updates the project's progress + lastChange and
+// records a resi-style log row so the client can track the full timeline.
+export const updateProjectProgress = async (
+  id: string,
+  data: {
+    progressPercentage: number;
+    message?: string;
+    updatedBy?: string;
+  }
+): Promise<Project> => {
+  const existing = await getProjectById(id);
+
+  const [result] = await db
+    .update(project)
+    .set({
+      progressPercentage: data.progressPercentage,
+      lastChange: new Date(),
+    })
+    .where(eq(project.id, id))
+    .returning();
+
+  await db.insert(projectLog).values({
+    projectId: id,
+    progressPercentage: data.progressPercentage,
+    message: data.message ?? null,
+    updatedBy: data.updatedBy ?? null,
+  });
+
+  return result ?? existing;
+};
+
+// Public lookup by tracking code (no auth). Used by the client tracking page.
+export const getProjectByIdentifier = async (code: string): Promise<Project> => {
+  const [result] = await db
+    .select()
+    .from(project)
+    .where(eq(project.code, code))
+    .limit(1);
+
+  if (!result) {
+    throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
+  }
+
+  return result;
+};
+
+// Full progress timeline (resi-style) for a project.
+export const getProjectLogs = async (
+  projectId: string
+): Promise<ProjectLog[]> => {
+  const logs = await db
+    .select()
+    .from(projectLog)
+    .where(eq(projectLog.projectId, projectId))
+    .orderBy(projectLog.createdAt);
+
+  return logs;
 };
 
 export const addProjectTechnology = async (
