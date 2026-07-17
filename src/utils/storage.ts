@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { config } from "../config/conf.js";
 
 export interface StorageService {
@@ -6,6 +12,7 @@ export interface StorageService {
   delete(key: string): Promise<void>;
   getPublicUrl(key: string): string;
   generateKey(prefix: string, filename: string): string;
+  generateSignedUrl(key: string, expiresInSeconds?: number): Promise<string>;
 }
 
 export class TigrisStorageService implements StorageService {
@@ -29,12 +36,26 @@ export class TigrisStorageService implements StorageService {
 
   generateKey(prefix: string, filename: string): string {
     const ext = filename.split(".").pop() || "bin";
-    const name = `${prefix}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const name = `${prefix}/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}.${ext}`;
     return name;
   }
 
   getPublicUrl(key: string): string {
     return `${this.publicUrl}/${key}`;
+  }
+
+  async generateSignedUrl(
+    key: string,
+    expiresInSeconds = 300
+  ): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
   }
 
   async upload(key: string, buffer: Buffer, mimeType: string): Promise<string> {

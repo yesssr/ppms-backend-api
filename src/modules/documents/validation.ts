@@ -1,9 +1,17 @@
-import { t } from "elysia";
+import { t, type TSchema } from "elysia";
 import { DOCUMENT_CATEGORY } from "../../constant/enum.js";
+
+const enumUnion = (values: readonly string[]) =>
+  t.Union(
+    values.map((v) => t.Literal(v)) as unknown as [TSchema, ...TSchema[]]
+  );
 
 export const documentPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),
   limit: t.Optional(t.Number({ minimum: 1, maximum: 100, default: 10 })),
+  search: t.Optional(t.String()),
+  category: t.Optional(enumUnion(DOCUMENT_CATEGORY)),
+  projectId: t.Optional(t.String({ format: "uuid" })),
 });
 
 export const documentParams = t.Object({
@@ -13,28 +21,13 @@ export const documentParams = t.Object({
 export const documentBody = t.Object({
   projectId: t.String({ format: "uuid" }),
   uploadedBy: t.String(),
-  fileName: t.String({ minLength: 1, maxLength: 255 }),
-  fileKey: t.String({ minLength: 1, maxLength: 500 }),
-  mimeType: t.String({ minLength: 1, maxLength: 100 }),
-  fileSize: t.Number({ minimum: 0 }),
-  category: t.Union([
-    t.Literal("requirement"),
-    t.Literal("design"),
-    t.Literal("contract"),
-    t.Literal("report"),
-    t.Literal("other"),
-  ]),
+  file: t.File(),
+  category: enumUnion(DOCUMENT_CATEGORY),
 });
 
 export const updateDocumentBody = t.Object({
-  fileName: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-  category: t.Optional(t.Union([
-    t.Literal("requirement"),
-    t.Literal("design"),
-    t.Literal("contract"),
-    t.Literal("report"),
-    t.Literal("other"),
-  ])),
+  file: t.Optional(t.File()),
+  category: t.Optional(enumUnion(DOCUMENT_CATEGORY)),
 });
 
 export type DocumentPaginationQuery = typeof documentPaginationQuery.$infer;
