@@ -4,6 +4,9 @@ SYSTEM_MAP.md
 INS.md
 erd.md
 .kilo
+/scripts
+PLAN.md
+
 # dependencies
 /node_modules
 /.pnp
