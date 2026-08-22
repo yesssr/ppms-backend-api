@@ -13,8 +13,8 @@ export const auth = betterAuth({
   }),
   trustedOrigins:
     config.app.NODE_ENV === "production"
-      ? [config.app.FRONTEND_URL]
-      : [config.app.FRONTEND_URL, "*"],
+      ? [config.app.FRONTEND_URL, config.app.BACKEND_URL]
+      : [config.app.FRONTEND_URL, config.app.BACKEND_URL, "*"],
   advanced: {
     disableCSRFCheck: config.app.NODE_ENV !== "production", // menonaktifkan pengecekan Origin jika bukan di production
   },
