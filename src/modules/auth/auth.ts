@@ -11,7 +11,13 @@ export const auth = betterAuth({
     provider: "pg",
     schema: authSchema,
   }),
-  trustedOrigins: [config.app.FRONTEND_URL],
+  trustedOrigins:
+    config.app.NODE_ENV === "production"
+      ? [config.app.FRONTEND_URL]
+      : [config.app.FRONTEND_URL, "*"],
+  advanced: {
+    disableCSRFCheck: config.app.NODE_ENV !== "production", // menonaktifkan pengecekan Origin jika bukan di production
+  },
   secret: config.auth.betterAuthSecret,
   emailAndPassword: {
     enabled: true,
