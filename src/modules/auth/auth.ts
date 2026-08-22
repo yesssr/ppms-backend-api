@@ -15,7 +15,7 @@ export const auth = betterAuth({
   secret: config.auth.betterAuthSecret,
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
+    disableSignUp: false,
   },
   user: {
     additionalFields: {

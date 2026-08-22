@@ -1,0 +1,16 @@
+meta {
+  name: Update Technology
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/technologies/:id
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "isActive": false
+  }
+}

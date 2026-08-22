@@ -1,0 +1,16 @@
+meta {
+  name: Update Task
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/tasks/:id
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "status": "in_progress"
+  }
+}

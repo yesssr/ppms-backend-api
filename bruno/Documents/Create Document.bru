@@ -1,0 +1,21 @@
+meta {
+  name: Create Document
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/documents
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "entityType": "project",
+    "entityId": "uuid-of-project",
+    "fileName": "Architecture_Diagram.pdf",
+    "fileType": "application/pdf",
+    "fileSize": 1048576,
+    "fileKey": "uploads/projects/Architecture_Diagram.pdf"
+  }
+}

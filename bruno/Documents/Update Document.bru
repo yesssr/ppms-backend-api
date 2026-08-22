@@ -1,0 +1,16 @@
+meta {
+  name: Update Document
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/documents/:id
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "fileName": "Updated_Architecture_Diagram.pdf"
+  }
+}

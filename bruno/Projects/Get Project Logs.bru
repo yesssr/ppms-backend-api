@@ -1,0 +1,11 @@
+meta {
+  name: Get Project Logs
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/projects/:id/logs
+  body: none
+  auth: none
+}

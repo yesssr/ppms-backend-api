@@ -1,0 +1,16 @@
+meta {
+  name: Remove Team Member
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/teams/:id/members
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "userId": "uuid-of-user"
+  }
+}

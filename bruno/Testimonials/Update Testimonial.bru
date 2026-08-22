@@ -1,0 +1,16 @@
+meta {
+  name: Update Testimonial
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/testimonials/:id
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "status": "rejected"
+  }
+}

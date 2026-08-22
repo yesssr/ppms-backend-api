@@ -1,0 +1,17 @@
+meta {
+  name: Create Team
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/teams
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "name": "Alpha Squad",
+    "description": "Frontend specialists team."
+  }
+}

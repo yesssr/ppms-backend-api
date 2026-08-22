@@ -1,0 +1,21 @@
+meta {
+  name: Create Case Study
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/case-studies
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "title": "Scalable Infrastructure for E-Commerce",
+    "problem": "Legacy system couldn't handle Black Friday traffic.",
+    "solution": "Migrated to a serverless AWS architecture.",
+    "result": "99.99% uptime during peak loads, 40% cost reduction.",
+    "isPublished": true,
+    "projectId": "uuid-of-a-project"
+  }
+}

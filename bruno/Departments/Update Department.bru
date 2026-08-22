@@ -1,0 +1,17 @@
+meta {
+  name: Update Department
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/departments/:id
+  body: json
+  auth: none
+}
+body:json {
+  {
+    "name": "Engineering",
+    "isActive": false
+  }
+}
