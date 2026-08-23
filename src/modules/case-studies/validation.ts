@@ -9,7 +9,7 @@ const enumUnion = (values: readonly string[]) =>
 export const caseStudyPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),
   limit: t.Optional(t.Number({ minimum: 1, maximum: 100, default: 10 })),
-  status: enumUnion(CONTENT_STATUS),
+  status: t.Optional(enumUnion(CONTENT_STATUS)),
 });
 
 export const caseStudyParams = t.Object({
