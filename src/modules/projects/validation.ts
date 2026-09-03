@@ -22,7 +22,7 @@ export const projectBody = t.Object({
   serviceId: t.String({ format: "uuid" }),
   createdBy: t.String(),
   name: t.String({ minLength: 1, maxLength: 150 }),
-  clientName: t.String({ minLength: 1, maxLength: 150 }),
+  clientId: t.String({ format: "uuid" }),
   description: t.Optional(t.String({ maxLength: 2000 })),
   repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
   demoUrl: t.Optional(t.String({ maxLength: 500 })),
@@ -40,7 +40,7 @@ export const projectBody = t.Object({
 export const updateProjectBody = t.Object({
   serviceId: t.Optional(t.String({ format: "uuid" })),
   name: t.Optional(t.String({ minLength: 1, maxLength: 150 })),
-  clientName: t.Optional(t.String({ minLength: 1, maxLength: 150 })),
+  clientId: t.Optional(t.String({ format: "uuid" })),
   description: t.Optional(t.String({ maxLength: 2000 })),
   repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
   demoUrl: t.Optional(t.String({ maxLength: 500 })),

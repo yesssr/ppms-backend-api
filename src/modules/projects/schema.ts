@@ -3,17 +3,20 @@ import { relations } from "drizzle-orm";
 import { user } from "../auth/schema.js";
 import { services } from "../services/schema.js";
 import { technology } from "../technology/schema.js";
+import { clients } from "../clients/schema.js";
 
 export const project = pgTable("project", {
   id: uuid("id").primaryKey().defaultRandom(),
   serviceId: uuid("service_id")
     .notNull()
     .references(() => services.id, { onDelete: "restrict" }),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id, { onDelete: "restrict" }),
   createdBy: text("created_by")
     .notNull()
     .references(() => user.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
-  clientName: text("client_name").notNull(),
   description: text("description"),
   repositoryUrl: text("repository_url"),
   demoUrl: text("demo_url"),
@@ -82,6 +85,10 @@ export const projectRelations = relations(project, ({ many, one }) => ({
     fields: [project.serviceId],
     references: [services.id],
   }),
+  client: one(clients, {
+    fields: [project.clientId],
+    references: [clients.id],
+  }),
 }));
 
 export const projectMemberRelations = relations(projectMember, ({ one }) => ({
@@ -134,6 +141,7 @@ export const projectLogRelations = relations(projectLog, ({ one }) => ({
 
 export type Project = typeof project.$inferSelect;
 export type NewProject = typeof project.$inferInsert;
+export type ProjectWithClient = Project & { clientName?: string | null };
 export type ProjectMember = typeof projectMember.$inferSelect;
 export type NewProjectMember = typeof projectMember.$inferInsert;
 export type ProjectTechnology = typeof projectTechnology.$inferSelect;

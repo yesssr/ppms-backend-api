@@ -10,6 +10,8 @@ import { serviceRoutes } from "./modules/services/routes.js";
 import { technologyRoutes } from "./modules/technology/routes.js";
 import { teamRoutes } from "./modules/teams/routes.js";
 import { userRoutes } from "./modules/users/routes.js";
+import { clientRoutes } from "./modules/clients/routes.js";
+import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { projectRoutes } from "./modules/projects/routes.js";
 import { caseStudyRoutes } from "./modules/case-studies/routes.js";
 import { testimonialRoutes } from "./modules/testimonials/routes.js";
@@ -119,6 +121,8 @@ const main = () => {
   app.use(technologyRoutes);
   app.use(teamRoutes);
   app.use(userRoutes);
+  app.use(clientRoutes);
+  app.use(dashboardRoutes);
   app.use(projectRoutes);
   app.use(caseStudyRoutes);
   app.use(testimonialRoutes);

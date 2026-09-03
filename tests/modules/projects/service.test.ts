@@ -43,6 +43,7 @@ const fakeProject = {
   id: "p1",
   code: "PRJ-ABC123",
   name: "Test Project",
+  clientId: "c1",
   clientName: "Client",
   status: "planning",
   progressPercentage: 0,
@@ -94,7 +95,7 @@ describe("createProject", () => {
       serviceId: "s1",
       createdBy: "u1",
       name: "Test",
-      clientName: "Client",
+      clientId: "c1",
       status: "planning",
     });
     expect(result).toEqual(fakeProject);

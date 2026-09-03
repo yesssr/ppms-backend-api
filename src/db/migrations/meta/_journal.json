@@ -1,5 +1,5 @@
 {
-  "version": "7",
+  "version": "8",
   "dialect": "postgresql",
   "entries": [
     {
@@ -49,6 +49,12 @@
       "version": "7",
       "when": 1784279356324,
       "tag": "0007_clumsy_supernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "8",
+      "tag": "0008_calm_zeus",
       "breakpoints": true
     }
   ]

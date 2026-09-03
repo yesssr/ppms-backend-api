@@ -20,6 +20,8 @@ import {
   documentSchema,
   documentDownloadSchema,
   taskSchema,
+  clientSchema,
+  dashboardSchema,
 } from "./schemas.js";
 
 export const openapiPlugin = openapi({
@@ -89,6 +91,8 @@ export const openapiPlugin = openapi({
         description: "Project documents — developer full access",
       },
       { name: "Tasks", description: "Project tasks — developer full access" },
+      { name: "Clients", description: "Master data — admin only" },
+      { name: "Dashboard", description: "Analytics dashboard — admin only" },
     ],
     components: {
       securitySchemes: {
@@ -149,6 +153,25 @@ export const openapiPlugin = openapi({
           responses: { 200: { description: "Signed out" } },
         },
       },
+      "/api/dashboard": {
+        get: {
+          tags: ["Dashboard"],
+          summary: "Get dashboard analytics",
+          description:
+            "Returns aggregated dashboard metrics including project counts, timeline trends, categories, top technologies, client satisfaction, and recent projects. **Admin only.**",
+          security: [{ sessionCookie: [] }],
+          responses: {
+            200: {
+              description: "Dashboard analytics",
+              content: {
+                "application/json": {
+                  schema: dashboardSchema,
+                },
+              },
+            },
+          },
+        },
+      } as any,
     },
   },
 });
@@ -178,6 +201,9 @@ export const responses = {
   documentDownload: success(documentDownloadSchema),
   task: success(taskSchema),
   taskList: listResult(taskSchema),
+  client: success(clientSchema),
+  clientList: listResult(clientSchema),
+  dashboard: success(dashboardSchema),
   deleted: success(t.Any()),
   error: errorResponse,
 };

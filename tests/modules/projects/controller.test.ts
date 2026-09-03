@@ -73,7 +73,7 @@ describe("createProject", () => {
   test("creates project without file", async () => {
     const result = await ctrl.createProject({
       body: {
-        serviceId: "s1", createdBy: "u1", name: "P", clientName: "C",
+        serviceId: "s1", createdBy: "u1", name: "P", clientId: "c1",
         status: "planning",
       },
     });
@@ -85,7 +85,7 @@ describe("createProject", () => {
     Object.defineProperty(file, "size", { value: 100 });
     const result = await ctrl.createProject({
       body: {
-        serviceId: "s1", createdBy: "u1", name: "P", clientName: "C",
+        serviceId: "s1", createdBy: "u1", name: "P", clientId: "c1",
         status: "planning", thumbnailFile: file,
       },
     });
@@ -97,7 +97,7 @@ describe("createProject", () => {
     Object.defineProperty(file, "size", { value: 20 * 1024 * 1024 });
     const result = await ctrl.createProject({
       body: {
-        serviceId: "s1", createdBy: "u1", name: "P", clientName: "C",
+        serviceId: "s1", createdBy: "u1", name: "P", clientId: "c1",
         status: "planning", thumbnailFile: file,
       },
     });

@@ -7,8 +7,9 @@ import {
   NewProject,
   Project,
   ProjectLog,
+  ProjectWithClient,
 } from "./schema.js";
-import { eq, count, and, sql, inArray, ilike } from "drizzle-orm";
+import { eq, count, and, sql, inArray, ilike, or } from "drizzle-orm";
 import { NotFoundError, ConflictError } from "../../utils/errors.js";
 import {
   PaginationParams,
@@ -18,8 +19,22 @@ import {
 } from "../../utils/pagination.js";
 import { storageService } from "../../utils/storage.js";
 import { teamMember } from "../teams/schema.js";
+import { clients } from "../clients/schema.js";
 
-export type { Project, NewProject } from "./schema.js";
+export type { Project, NewProject, ProjectWithClient } from "./schema.js";
+
+const withClient = async (p: Project): Promise<ProjectWithClient> => {
+  const [clientRow] = await db
+    .select()
+    .from(clients)
+    .where(eq(clients.id, p.clientId))
+    .limit(1);
+
+  return {
+    ...p,
+    clientName: clientRow?.name ?? null,
+  };
+};
 
 export const getProjects = async (
   params: PaginationParams & {
@@ -27,14 +42,17 @@ export const getProjects = async (
     serviceId?: string;
     status?: string;
   }
-): Promise<PaginatedResult<Project>> => {
+): Promise<PaginatedResult<ProjectWithClient>> => {
   const offset = getPaginationOffset(params.page, params.limit);
 
   const conditions = [];
 
   if (params.search) {
     conditions.push(
-      sql`${ilike(project.name, `%${params.search}%`)} OR ${ilike(project.clientName, `%${params.search}%`)}`
+      or(
+        ilike(project.name, `%${params.search}%`),
+        ilike(clients.name, `%${params.search}%`)
+      )
     );
   }
 
@@ -49,19 +67,35 @@ export const getProjects = async (
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [items, countResult] = await Promise.all([
-    db.select().from(project).where(whereClause).limit(params.limit).offset(offset),
-    db.select({ count: count() }).from(project).where(whereClause),
+    db
+      .select({ project, client: clients })
+      .from(project)
+      .leftJoin(clients, eq(project.clientId, clients.id))
+      .where(whereClause)
+      .limit(params.limit)
+      .offset(offset),
+    db
+      .select({ count: count() })
+      .from(project)
+      .leftJoin(clients, eq(project.clientId, clients.id))
+      .where(whereClause),
   ]);
+
+  const data = items.map(({ project, client }) => ({
+    ...project,
+    clientName: client?.name ?? null,
+  }));
 
   const total = Number(countResult[0]?.count ?? 0);
 
-  return paginate(items, total, params);
+  return paginate(data, total, params);
 };
 
-export const getProjectById = async (id: string): Promise<Project> => {
+export const getProjectById = async (id: string): Promise<ProjectWithClient> => {
   const [result] = await db
-    .select()
+    .select({ project, client: clients })
     .from(project)
+    .leftJoin(clients, eq(project.clientId, clients.id))
     .where(eq(project.id, id))
     .limit(1);
 
@@ -69,7 +103,10 @@ export const getProjectById = async (id: string): Promise<Project> => {
     throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
   }
 
-  return result;
+  return {
+    ...result.project,
+    clientName: result.client?.name ?? null,
+  };
 };
 
 export const generateProjectCode = (): string => {
@@ -85,7 +122,7 @@ export const createProject = async (data: {
   serviceId: string;
   createdBy: string;
   name: string;
-  clientName: string;
+  clientId: string;
   description?: string;
   repositoryUrl?: string;
   demoUrl?: string;
@@ -97,15 +134,15 @@ export const createProject = async (data: {
   technologyIds?: string[];
   memberIds?: string[];
   teamIds?: string[];
-}): Promise<Project> => {
+}): Promise<ProjectWithClient> => {
   const [result] = await db
     .insert(project)
     .values({
       code: generateProjectCode(),
       serviceId: data.serviceId,
+      clientId: data.clientId,
       createdBy: data.createdBy,
       name: data.name,
-      clientName: data.clientName,
       description: data.description,
       repositoryUrl: data.repositoryUrl,
       demoUrl: data.demoUrl,
@@ -156,7 +193,7 @@ export const updateProject = async (
     memberIds?: string[];
     teamIds?: string[];
   }
-): Promise<Project> => {
+): Promise<ProjectWithClient> => {
   const updateData: Record<string, unknown> = { ...data };
   delete updateData.technologyIds;
   delete updateData.memberIds;
@@ -205,7 +242,7 @@ export const updateProject = async (
     }
   }
 
-  return result;
+  return getProjectById(id);
 };
 
 export const deleteProject = async (id: string): Promise<void> => {
@@ -225,7 +262,7 @@ export const updateProjectProgress = async (
     message?: string;
     updatedBy?: string;
   }
-): Promise<Project> => {
+): Promise<ProjectWithClient> => {
   const existing = await getProjectById(id);
 
   const [result] = await db
@@ -244,14 +281,15 @@ export const updateProjectProgress = async (
     updatedBy: data.updatedBy ?? null,
   });
 
-  return result ?? existing;
+  return getProjectById(id);
 };
 
 // Public lookup by tracking code (no auth). Used by the client tracking page.
-export const getProjectByIdentifier = async (code: string): Promise<Project> => {
+export const getProjectByIdentifier = async (code: string): Promise<ProjectWithClient> => {
   const [result] = await db
-    .select()
+    .select({ project, client: clients })
     .from(project)
+    .leftJoin(clients, eq(project.clientId, clients.id))
     .where(eq(project.code, code))
     .limit(1);
 
@@ -259,7 +297,10 @@ export const getProjectByIdentifier = async (code: string): Promise<Project> => 
     throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
   }
 
-  return result;
+  return {
+    ...result.project,
+    clientName: result.client?.name ?? null,
+  };
 };
 
 // Full progress timeline (resi-style) for a project.

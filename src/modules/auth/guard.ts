@@ -17,7 +17,9 @@ export const getRequiredRole = (method: string, path: string): RequiredRole => {
   if (
     path.startsWith("/api/departments") ||
     path.startsWith("/api/services") ||
-    path.startsWith("/api/users")
+    path.startsWith("/api/users") ||
+    path.startsWith("/api/clients") ||
+    path.startsWith("/api/dashboard")
   ) {
     return "admin";
   }

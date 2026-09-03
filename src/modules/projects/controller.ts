@@ -88,7 +88,7 @@ export async function createProject(context: { body: ProjectBody }) {
       serviceId: body.serviceId,
       createdBy: body.createdBy,
       name: body.name,
-      clientName: body.clientName,
+      clientId: body.clientId,
       description: body.description,
       repositoryUrl: body.repositoryUrl,
       demoUrl: body.demoUrl,
@@ -142,7 +142,7 @@ export async function updateProject(context: {
     const project = await updateProjectSvc(context.params.id, {
       serviceId: body.serviceId,
       name: body.name,
-      clientName: body.clientName,
+      clientId: body.clientId,
       description: body.description,
       repositoryUrl: body.repositoryUrl,
       demoUrl: body.demoUrl,

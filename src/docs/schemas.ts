@@ -144,12 +144,23 @@ export const userWithRelationsSchema = t.Object({
   teams: t.Array(teamSchema),
 });
 
+export const clientSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  email: t.Union([t.String(), t.Null()]),
+  phone: t.Union([t.String(), t.Null()]),
+  address: t.Union([t.String(), t.Null()]),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
+});
+
 export const projectSchema = t.Object({
   id: t.String(),
   serviceId: t.String(),
+  clientId: t.String(),
+  clientName: t.String(),
   createdBy: t.String(),
   name: t.String(),
-  clientName: t.String(),
   description: t.Union([t.String(), t.Null()]),
   repositoryUrl: t.Union([t.String(), t.Null()]),
   demoUrl: t.Union([t.String(), t.Null()]),
@@ -232,4 +243,51 @@ export const taskSchema = t.Object({
   dueDate: t.Union([t.String(), t.Null()]),
   createdAt: t.Date(),
   updatedAt: t.Date(),
+});
+
+export const dashboardSummarySchema = t.Object({
+  totalProjects: t.Number(),
+  completedProjects: t.Number(),
+  inProgressProjects: t.Number(),
+  totalClients: t.Number(),
+});
+
+export const timelineTrendSchema = t.Object({
+  month: t.String(),
+  inProgress: t.Number(),
+  completed: t.Number(),
+  total: t.Number(),
+});
+
+export const projectByCategorySchema = t.Object({
+  serviceId: t.String(),
+  serviceName: t.String(),
+  count: t.Number(),
+});
+
+export const topTechnologySchema = t.Object({
+  technologyId: t.String(),
+  technologyName: t.String(),
+  usagePercentage: t.Number(),
+});
+
+export const clientSatisfactionSchema = t.Object({
+  averageRating: t.Union([t.Number(), t.Null()]),
+});
+
+export const recentProjectSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  clientName: t.Union([t.String(), t.Null()]),
+  status: t.String(),
+  createdAt: t.Date(),
+});
+
+export const dashboardSchema = t.Object({
+  summary: dashboardSummarySchema,
+  timelineTrend: t.Array(timelineTrendSchema),
+  projectsByCategory: t.Array(projectByCategorySchema),
+  topTechnologies: t.Array(topTechnologySchema),
+  clientSatisfaction: clientSatisfactionSchema,
+  recentProjects: t.Array(recentProjectSchema),
 });
