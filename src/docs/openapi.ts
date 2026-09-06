@@ -153,25 +153,6 @@ export const openapiPlugin = openapi({
           responses: { 200: { description: "Signed out" } },
         },
       },
-      "/api/dashboard": {
-        get: {
-          tags: ["Dashboard"],
-          summary: "Get dashboard analytics",
-          description:
-            "Returns aggregated dashboard metrics including project counts, timeline trends, categories, top technologies, client satisfaction, and recent projects. **Admin only.**",
-          security: [{ sessionCookie: [] }],
-          responses: {
-            200: {
-              description: "Dashboard analytics",
-              content: {
-                "application/json": {
-                  schema: dashboardSchema,
-                },
-              },
-            },
-          },
-        },
-      } as any,
     },
   },
 });
