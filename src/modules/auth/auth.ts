@@ -16,7 +16,7 @@ export const auth = betterAuth({
       ? [config.app.FRONTEND_URL, config.app.BACKEND_URL]
       : [config.app.FRONTEND_URL, config.app.BACKEND_URL, "*"],
   advanced: {
-    disableCSRFCheck: config.app.NODE_ENV !== "production", // menonaktifkan pengecekan Origin jika bukan di production
+    disableCSRFCheck: config.app.NODE_ENV !== "production",
   },
   secret: config.auth.betterAuthSecret,
   emailAndPassword: {
@@ -36,6 +36,13 @@ export const auth = betterAuth({
         type: "boolean",
       },
     },
+  },
+  cookie: {
+    name: "better-auth.session_token",
+    secure: config.app.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   },
 });
 

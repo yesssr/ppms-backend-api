@@ -22,11 +22,18 @@ import {
   taskSchema,
   clientSchema,
   dashboardSchema,
+  notificationSchema,
+  unreadCountSchema,
+  markAllReadSchema,
 } from "./schemas.js";
 
 export const openapiPlugin = openapi({
   path: "/openapi",
   provider: "swagger-ui",
+  specPath: "/openapi/json",
+  swagger: {
+    url: "/openapi/json",
+  } as any,
   documentation: {
     info: {
       title: "PPMS Backend API",
@@ -93,6 +100,7 @@ export const openapiPlugin = openapi({
       { name: "Tasks", description: "Project tasks — developer full access" },
       { name: "Clients", description: "Master data — admin only" },
       { name: "Dashboard", description: "Analytics dashboard — admin only" },
+      { name: "Notifications", description: "User notifications — developer full access" },
     ],
     components: {
       securitySchemes: {
@@ -167,7 +175,8 @@ export const responses = {
   technologyList: listResult(technologySchema),
   team: success(teamSchema),
   teamList: listResult(teamSchema),
-  teamMemberList: listResult(teamMemberSchema),
+  teamMember: success(teamMemberSchema),
+  teamMemberList: successList(teamMemberSchema),
   user: success(userWithRelationsSchema),
   userList: listResult(userWithRelationsSchema),
   project: success(projectSchema),
@@ -185,6 +194,10 @@ export const responses = {
   client: success(clientSchema),
   clientList: listResult(clientSchema),
   dashboard: success(dashboardSchema),
+  notification: success(notificationSchema),
+  notificationList: listResult(notificationSchema),
+  unreadCount: success(unreadCountSchema),
+  markAllRead: success(markAllReadSchema),
   deleted: success(t.Any()),
   error: errorResponse,
 };

@@ -15,6 +15,7 @@ import {
   paginate,
   getPaginationOffset,
 } from "../../utils/pagination.js";
+import { triggerTeamAddedNotification } from "../notifications/service.js";
 
 export type { Team, NewTeam, TeamMember, NewTeamMember } from "./schema.js";
 
@@ -85,7 +86,13 @@ export const getTeamMembers = async (teamId: string) => {
 export const addTeamMember = async (
   data: NewTeamMember
 ): Promise<TeamMember> => {
+  const [teamRow] = await db.select().from(team).where(eq(team.id, data.teamId)).limit(1);
   const [result] = await db.insert(teamMember).values(data).returning();
+  
+  if (teamRow) {
+    await triggerTeamAddedNotification(data.userId, teamRow.name, data.teamId);
+  }
+  
   return result;
 };
 

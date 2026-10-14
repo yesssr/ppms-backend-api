@@ -25,6 +25,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   isActive: boolean("is_active").default(false).notNull(),
   image: text("image"),
+  fcmToken: text("fcm_token"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

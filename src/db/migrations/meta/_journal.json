@@ -1,5 +1,5 @@
 {
-  "version": "8",
+  "version": "9",
   "dialect": "postgresql",
   "entries": [
     {
@@ -55,6 +55,12 @@
       "idx": 8,
       "version": "8",
       "tag": "0008_calm_zeus",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "9",
+      "tag": "0009_notifications",
       "breakpoints": true
     }
   ]

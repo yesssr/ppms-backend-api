@@ -1,0 +1,88 @@
+{
+  "schema": "public",
+  "tables": {
+    "user": {
+      "columns": {
+        "fcm_token": {
+          "type": "text",
+          "nullable": true
+        }
+      }
+    },
+    "notification": {
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "text",
+          "nullable": false
+        },
+        "title": {
+          "type": "text",
+          "nullable": false
+        },
+        "body": {
+          "type": "text",
+          "nullable": false
+        },
+        "type": {
+          "type": "text",
+          "nullable": false
+        },
+        "reference_id": {
+          "type": "text",
+          "nullable": true
+        },
+        "reference_type": {
+          "type": "text",
+          "nullable": true
+        },
+        "is_read": {
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        "sent_at": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "now()"
+        },
+        "expires_at": {
+          "type": "timestamp",
+          "nullable": false
+        },
+        "created_at": {
+          "type": "timestamp",
+          "nullable": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "notification_user_id_idx": {
+          "columns": ["user_id"],
+          "unique": false
+        },
+        "notification_expires_at_idx": {
+          "columns": ["expires_at"],
+          "unique": false
+        },
+        "notification_user_is_read_idx": {
+          "columns": ["user_id", "is_read"],
+          "unique": false
+        }
+      },
+      "foreignKeys": {
+        "notification_user_id_user_id_fk": {
+          "columns": ["user_id"],
+          "referencedTable": "user",
+          "referencedColumns": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      }
+    }
+  }
+}

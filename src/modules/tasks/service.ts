@@ -1,5 +1,6 @@
 import { db } from "../../db/index.js";
 import { task, NewTask, Task } from "./schema.js";
+import { project } from "../projects/schema.js";
 import { eq, count, ilike, and } from "drizzle-orm";
 import { NotFoundError } from "../../utils/errors.js";
 import {
@@ -8,6 +9,7 @@ import {
   paginate,
   getPaginationOffset,
 } from "../../utils/pagination.js";
+import { triggerTaskAssignedNotification } from "../notifications/service.js";
 
 export type { Task, NewTask } from "./schema.js";
 
@@ -49,7 +51,13 @@ export const getTaskById = async (id: string): Promise<Task> => {
 };
 
 export const createTask = async (data: NewTask): Promise<Task> => {
+  const [projectRow] = await db.select({ name: project.name }).from(project).where(eq(project.id, data.projectId)).limit(1);
   const [result] = await db.insert(task).values(data).returning();
+  
+  if (result.assigneeId && projectRow) {
+    await triggerTaskAssignedNotification(result.assigneeId, result.title, result.id, projectRow.name);
+  }
+  
   return result;
 };
 
@@ -57,10 +65,18 @@ export const updateTask = async (
   id: string,
   data: Partial<NewTask>
 ): Promise<Task> => {
+  const [existingTask] = await db.select().from(task).where(eq(task.id, id)).limit(1);
   const [result] = await db.update(task).set(data).where(eq(task.id, id)).returning();
 
   if (!result) {
     throw NotFoundError("Task not found", "TASK_NOT_FOUND");
+  }
+
+  if (data.assigneeId && data.assigneeId !== existingTask?.assigneeId) {
+    const [projectRow] = await db.select({ name: project.name }).from(project).where(eq(project.id, result.projectId)).limit(1);
+    if (projectRow) {
+      await triggerTaskAssignedNotification(data.assigneeId, result.title, result.id, projectRow.name);
+    }
   }
 
   return result;

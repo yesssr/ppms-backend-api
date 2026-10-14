@@ -26,6 +26,7 @@ export const success = <T>(data: T, message?: string): ApiResponse<T> => ({
   success: true,
   data,
   message,
+  error: null,
 });
 
 export const successWithMeta = <T>(
@@ -37,6 +38,7 @@ export const successWithMeta = <T>(
   data,
   meta,
   message,
+  error: null,
 });
 
 export const error = (
@@ -45,9 +47,12 @@ export const error = (
   details?: unknown
 ): ApiResponse<never> => ({
   success: false,
+  data: null,
+  message,
   error: {
     message,
     code,
     details,
   },
+  meta: null,
 });

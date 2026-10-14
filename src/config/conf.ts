@@ -11,6 +11,10 @@ function required(key: string): string {
   return value;
 }
 
+function optional(key: string): string | undefined {
+  return process.env[key];
+}
+
 export const config = {
   app: {
     NODE_ENV: process.env.NODE_ENV ?? "development",
@@ -33,5 +37,10 @@ export const config = {
     endpointUrlS3: required("AWS_ENDPOINT_URL_S3"),
     endpointUrlIAM: required("AWS_ENDPOINT_URL_IAM"),
     publicUrl: required("PUBLIC_URL"),
+  },
+  notifications: {
+    firebaseProjectId: optional("FIREBASE_PROJECT_ID"),
+    firebaseClientEmail: optional("FIREBASE_CLIENT_EMAIL"),
+    firebasePrivateKey: optional("FIREBASE_PRIVATE_KEY"),
   },
 };

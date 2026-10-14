@@ -8,6 +8,7 @@ import {
   DOCUMENT_CATEGORY,
   CONTENT_STATUS,
 } from "../constant/enum.js";
+import { NOTIFICATION_TYPES } from "../modules/notifications/schema.js";
 
 // Build a t.Union of t.Literal from a readonly string tuple so the OpenAPI
 // docs expose the same allowed values enforced in backend code (constant/enum.ts).
@@ -43,21 +44,28 @@ export const metaSchema = t.Object(
 // Note: `error`/`meta` use t.Any() (not t.Null()) because Elysia's runtime
 // response validation rejects t.Null() in the envelope, producing spurious
 // 422s even when the actual payload is correct.
+// Also accepts error responses where data=null via t.Union.
 export const success = (data: TSchema): any =>
   t.Object({
     success: t.Boolean({ description: "Always true on success" }),
-    data,
+    data: t.Union([data, t.Any()]),
     message: t.String({ description: "Human-readable status message" }),
     error: t.Any({ description: "null on success" }),
     meta: t.Optional(t.Any()),
   });
 
-// Build a paginated list response (matches the actual `paginate()` return shape
-// used by list controllers: { data: T[], meta }).
+// Build a paginated list response (matches the actual `successWithMeta` return shape
+// used by list controllers: { success, data, meta, message, error }).
+// Uses Union with t.Any()/t.Null() to also accept error responses where
+// data=null and meta=null, since Elysia validates the response schema for both
+// success and error cases.
 export const listResult = (item: TSchema): any =>
   t.Object({
-    data: t.Array(item),
-    meta: metaSchema,
+    success: t.Boolean({ description: "Always true on success" }),
+    data: t.Union([t.Array(item), t.Any()]),
+    meta: t.Optional(t.Union([metaSchema, t.Any()])),
+    message: t.String({ description: "Human-readable status message" }),
+    error: t.Any({ description: "null on success" }),
   });
 
 // Build a success response where data is an array wrapped in the standard
@@ -65,7 +73,7 @@ export const listResult = (item: TSchema): any =>
 export const successList = (item: TSchema): any =>
   t.Object({
     success: t.Boolean({ description: "Always true on success" }),
-    data: t.Array(item),
+    data: t.Union([t.Array(item), t.Any()]),
     message: t.String({ description: "Human-readable status message" }),
     error: t.Any({ description: "null on success" }),
     meta: t.Optional(t.Any()),
@@ -73,7 +81,7 @@ export const successList = (item: TSchema): any =>
 
 export const errorResponse: any = t.Object({
   success: t.Boolean({ description: "Always false on failure" }),
-  data: t.Any(),
+  data: t.Any({ description: "null on failure" }),
   message: t.String({ description: "Human-readable error message" }),
   error: errorSchema,
   meta: t.Optional(t.Any()),
@@ -245,6 +253,24 @@ export const taskSchema = t.Object({
   updatedAt: t.Date(),
 });
 
+const notificationTypeUnion = t.Union(
+  NOTIFICATION_TYPES.map((v) => t.Literal(v)) as unknown as [TSchema, ...TSchema[]]
+);
+
+export const notificationSchema = t.Object({
+  id: t.String(),
+  userId: t.String(),
+  title: t.String(),
+  body: t.String(),
+  type: notificationTypeUnion,
+  referenceId: t.Union([t.String(), t.Null()]),
+  referenceType: t.Union([t.String(), t.Null()]),
+  isRead: t.Boolean(),
+  sentAt: t.Date(),
+  expiresAt: t.Date(),
+  createdAt: t.Date(),
+});
+
 export const dashboardSummarySchema = t.Object({
   totalProjects: t.Number(),
   completedProjects: t.Number(),
@@ -290,4 +316,12 @@ export const dashboardSchema = t.Object({
   topTechnologies: t.Array(topTechnologySchema),
   clientSatisfaction: clientSatisfactionSchema,
   recentProjects: t.Array(recentProjectSchema),
+});
+
+export const unreadCountSchema = t.Object({
+  count: t.Number(),
+});
+
+export const markAllReadSchema = t.Object({
+  count: t.Number(),
 });
