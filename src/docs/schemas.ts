@@ -265,6 +265,7 @@ export const documentSchema = t.Object({
 // never returned to clients.
 export const documentDownloadSchema = t.Object({
   downloadUrl: t.String(),
+  fileName: t.String(),
 });
 
 export const taskSchema = t.Object({

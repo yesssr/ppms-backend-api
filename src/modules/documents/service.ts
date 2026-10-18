@@ -73,9 +73,11 @@ export const getDocumentById = async (id: string): Promise<Omit<Document, "fileK
 
 // Returns a short-lived signed URL the client can use to download the file
 // directly from object storage. The fileKey itself is never exposed.
-export const getDocumentDownload = async (id: string): Promise<{ downloadUrl: string }> => {
+export const getDocumentDownload = async (
+  id: string
+): Promise<{ downloadUrl: string; fileName: string }> => {
   const [result] = await db
-    .select({ fileKey: document.fileKey })
+    .select({ fileKey: document.fileKey, fileName: document.fileName })
     .from(document)
     .where(eq(document.id, id))
     .limit(1);
@@ -85,7 +87,7 @@ export const getDocumentDownload = async (id: string): Promise<{ downloadUrl: st
   }
 
   const downloadUrl = await storageService.generateSignedUrl(result.fileKey, 300);
-  return { downloadUrl };
+  return { downloadUrl, fileName: result.fileName };
 };
 
 export const createDocument = async (data: NewDocument): Promise<Document> => {

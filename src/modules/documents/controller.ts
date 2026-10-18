@@ -130,8 +130,8 @@ export async function deleteDocument(context: { params: DocumentParams }) {
 // never sent to the client. The client downloads directly from object storage.
 export async function downloadDocument(context: { params: DocumentParams }) {
   try {
-    const { downloadUrl } = await getDocumentDownload(context.params.id);
-    return success({ downloadUrl }, "Download URL generated successfully");
+    const { downloadUrl, fileName } = await getDocumentDownload(context.params.id);
+    return success({ downloadUrl, fileName }, "Download URL generated successfully");
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {
       return error("Document not found", "DOCUMENT_NOT_FOUND");
