@@ -141,7 +141,24 @@ export const projectLogRelations = relations(projectLog, ({ one }) => ({
 
 export type Project = typeof project.$inferSelect;
 export type NewProject = typeof project.$inferInsert;
-export type ProjectWithClient = Project & { clientName?: string | null };
+export type ProjectMemberDetail = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  image: string | null;
+};
+export type ProjectTechnologyDetail = {
+  id: string;
+  name: string;
+};
+export type ProjectWithClient = Project & {
+  clientName?: string | null;
+  memberIds?: string[];
+  technologyIds?: string[];
+  members?: ProjectMemberDetail[];
+  technologies?: ProjectTechnologyDetail[];
+};
 export type ProjectMember = typeof projectMember.$inferSelect;
 export type NewProjectMember = typeof projectMember.$inferInsert;
 export type ProjectTechnology = typeof projectTechnology.$inferSelect;

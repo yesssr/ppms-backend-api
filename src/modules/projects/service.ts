@@ -20,6 +20,8 @@ import {
 import { storageService } from "../../utils/storage.js";
 import { teamMember } from "../teams/schema.js";
 import { clients } from "../clients/schema.js";
+import { user } from "../auth/schema.js";
+import { technology } from "../technology/schema.js";
 
 export type { Project, NewProject, ProjectWithClient } from "./schema.js";
 
@@ -103,9 +105,32 @@ export const getProjectById = async (id: string): Promise<ProjectWithClient> => 
     throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
   }
 
+  const [memberRows, techRows] = await Promise.all([
+    db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+      })
+      .from(projectMember)
+      .innerJoin(user, eq(projectMember.userId, user.id))
+      .where(eq(projectMember.projectId, id)),
+    db
+      .select({ id: technology.id, name: technology.name })
+      .from(projectTechnology)
+      .innerJoin(technology, eq(projectTechnology.technologyId, technology.id))
+      .where(eq(projectTechnology.projectId, id)),
+  ]);
+
   return {
     ...result.project,
     clientName: result.client?.name ?? null,
+    memberIds: memberRows.map((m) => m.id),
+    technologyIds: techRows.map((t) => t.id),
+    members: memberRows,
+    technologies: techRows,
   };
 };
 
@@ -263,8 +288,6 @@ export const updateProjectProgress = async (
     updatedBy?: string;
   }
 ): Promise<ProjectWithClient> => {
-  const existing = await getProjectById(id);
-
   const [result] = await db
     .update(project)
     .set({
@@ -273,6 +296,10 @@ export const updateProjectProgress = async (
     })
     .where(eq(project.id, id))
     .returning();
+
+  if (!result) {
+    throw NotFoundError("Project not found", "PROJECT_NOT_FOUND");
+  }
 
   await db.insert(projectLog).values({
     projectId: id,

@@ -1,34 +1,9 @@
 import { describe, test, expect, mock, beforeEach } from "bun:test";
+import { createChain, getSharedMockDb, clearMockDb } from "../../helpers/db-mock.js";
 
-function createChain(result: unknown[] = []) {
-  const makeChain = (r: unknown[]) => {
-    const c: Record<string, unknown> = {};
-    c.select = () => makeChain(r);
-    c.from = () => makeChain(r);
-    c.where = () => makeChain(r);
-    c.limit = () => makeChain(r);
-    c.offset = () => makeChain(r);
-    c.orderBy = () => makeChain(r);
-    c.innerJoin = () => makeChain(r);
-    c.set = () => makeChain(r);
-    c.values = () => makeChain(r);
-    c.returning = () => makeChain(r);
-    c.then = (resolve: (v: unknown) => void) => {
-      resolve(r);
-    };
-    return c;
-  };
-  return makeChain(result);
-}
+const mockDb = getSharedMockDb();
 
-const mockDb = {
-  select: mock(() => createChain([])),
-  insert: mock(() => createChain([])),
-  update: mock(() => createChain([])),
-  delete: mock(() => createChain([])),
-};
-
-mock.module("../../../src/db/index.js", () => ({ db: mockDb }));
+mock.module("../../../src/db/index.js", () => ({ db: getSharedMockDb() }));
 
 mock.module("../../../src/modules/auth/schema.js", () => ({
   user: { id: "id", name: "name", email: "email" },
@@ -55,10 +30,7 @@ mock.module("../../../src/modules/projects/schema.js", () => ({
 const svc = await import("../../../src/modules/users/service");
 
 beforeEach(() => {
-  mockDb.select.mockClear();
-  mockDb.insert.mockClear();
-  mockDb.update.mockClear();
-  mockDb.delete.mockClear();
+  clearMockDb(mockDb);
 });
 
 const fakeUser = { id: "u1", name: "John", email: "john@test.com", role: "developer" };

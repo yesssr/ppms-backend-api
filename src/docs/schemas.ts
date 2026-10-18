@@ -174,6 +174,27 @@ export const projectSchema = t.Object({
   endDate: t.Union([t.String(), t.Null()]),
   createdAt: t.Date(),
   updatedAt: t.Date(),
+  memberIds: t.Optional(t.Array(t.String())),
+  technologyIds: t.Optional(t.Array(t.String())),
+  members: t.Optional(
+    t.Array(
+      t.Object({
+        id: t.String(),
+        name: t.String(),
+        email: t.String(),
+        role: t.String(),
+        image: t.Union([t.String(), t.Null()]),
+      })
+    )
+  ),
+  technologies: t.Optional(
+    t.Array(
+      t.Object({
+        id: t.String(),
+        name: t.String(),
+      })
+    )
+  ),
 });
 
 export const projectLogSchema = t.Object({

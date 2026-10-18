@@ -18,14 +18,14 @@ export const getRequiredRole = (method: string, path: string): RequiredRole => {
     path.startsWith("/api/departments") ||
     path.startsWith("/api/services") ||
     path.startsWith("/api/users") ||
-    path.startsWith("/api/clients") ||
-    path.startsWith("/api/dashboard")
+    path.startsWith("/api/clients")
   ) {
     return "admin";
   }
 
   // Mixed modules: reads allowed for developers, writes require admin.
   if (
+    path.startsWith("/api/dashboard") ||
     path.startsWith("/api/technologies") ||
     path.startsWith("/api/teams") ||
     path.startsWith("/api/case-studies") ||

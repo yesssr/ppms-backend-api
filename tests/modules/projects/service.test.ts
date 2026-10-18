@@ -1,42 +1,14 @@
 import { describe, test, expect, mock, beforeEach } from "bun:test";
+import { createChain, getSharedMockDb, clearMockDb } from "../../helpers/db-mock.js";
 
-function createChain(result: unknown[] = []) {
-  const makeChain = (r: unknown[]) => {
-    const c: Record<string, unknown> = {};
-    c.select = () => makeChain(r);
-    c.from = () => makeChain(r);
-    c.where = () => makeChain(r);
-    c.limit = () => makeChain(r);
-    c.offset = () => makeChain(r);
-    c.orderBy = () => makeChain(r);
-    c.innerJoin = () => makeChain(r);
-    c.set = () => makeChain(r);
-    c.values = () => makeChain(r);
-    c.returning = () => makeChain(r);
-    c.then = (resolve: (v: unknown) => void) => {
-      resolve(r);
-    };
-    return c;
-  };
-  return makeChain(result);
-}
+const mockDb = getSharedMockDb();
 
-const mockDb = {
-  select: mock(() => createChain([])),
-  insert: mock(() => createChain([])),
-  update: mock(() => createChain([])),
-  delete: mock(() => createChain([])),
-};
-
-mock.module("../../../src/db/index.js", () => ({ db: mockDb }));
+mock.module("../../../src/db/index.js", () => ({ db: getSharedMockDb() }));
 
 const svc = await import("../../../src/modules/projects/service");
 
 beforeEach(() => {
-  mockDb.select.mockClear();
-  mockDb.insert.mockClear();
-  mockDb.update.mockClear();
-  mockDb.delete.mockClear();
+  clearMockDb(mockDb);
 });
 
 const fakeProject = {
@@ -49,6 +21,15 @@ const fakeProject = {
   progressPercentage: 0,
   createdAt: new Date(),
   updatedAt: new Date(),
+};
+
+// getProjectById enriches the project with its members and technologies.
+const enrichedProject = {
+  ...fakeProject,
+  memberIds: [],
+  technologyIds: [],
+  members: [],
+  technologies: [],
 };
 
 describe("generateProjectCode", () => {
@@ -66,7 +47,9 @@ describe("generateProjectCode", () => {
 describe("getProjects", () => {
   test("calls db.select and returns paginated result", async () => {
     mockDb.select
-      .mockImplementationOnce(() => createChain([fakeProject]))
+      .mockImplementationOnce(() =>
+        createChain([{ project: fakeProject, client: { name: "Client" } }])
+      )
       .mockImplementationOnce(() => createChain([{ count: 1 }]));
     const result = await svc.getProjects({ page: 1, limit: 10 });
     expect(result.data).toEqual([fakeProject]);
@@ -76,9 +59,11 @@ describe("getProjects", () => {
 
 describe("getProjectById", () => {
   test("returns project when found", async () => {
-    mockDb.select.mockImplementationOnce(() => createChain([fakeProject]));
+    mockDb.select.mockImplementationOnce(() =>
+      createChain([{ project: fakeProject, client: { name: "Client" } }])
+    );
     const result = await svc.getProjectById("p1");
-    expect(result).toEqual(fakeProject);
+    expect(result).toEqual(enrichedProject);
   });
 
   test("throws NotFoundError when not found", async () => {
@@ -90,7 +75,9 @@ describe("getProjectById", () => {
 describe("createProject", () => {
   test("inserts project and returns it", async () => {
     mockDb.insert.mockImplementationOnce(() => createChain([fakeProject]));
-    mockDb.select.mockImplementationOnce(() => createChain([fakeProject]));
+    mockDb.select.mockImplementationOnce(() =>
+      createChain([{ project: fakeProject, client: { name: "Client" } }])
+    );
     const result = await svc.createProject({
       serviceId: "s1",
       createdBy: "u1",
@@ -98,7 +85,7 @@ describe("createProject", () => {
       clientId: "c1",
       status: "planning",
     });
-    expect(result).toEqual(fakeProject);
+    expect(result).toEqual(enrichedProject);
     expect(mockDb.insert).toHaveBeenCalled();
   });
 });
@@ -106,8 +93,11 @@ describe("createProject", () => {
 describe("updateProject", () => {
   test("updates and returns project", async () => {
     mockDb.update.mockImplementationOnce(() => createChain([fakeProject]));
+    mockDb.select.mockImplementationOnce(() =>
+      createChain([{ project: fakeProject, client: { name: "Client" } }])
+    );
     const result = await svc.updateProject("p1", { name: "Updated" });
-    expect(result).toEqual(fakeProject);
+    expect(result).toEqual(enrichedProject);
   });
 
   test("throws NotFoundError when not found", async () => {
@@ -130,20 +120,23 @@ describe("deleteProject", () => {
 
 describe("updateProjectProgress", () => {
   test("updates progress and inserts log", async () => {
-    mockDb.select.mockImplementationOnce(() => createChain([fakeProject]));
+    const joined = [{ project: fakeProject, client: { name: "Client" } }];
+    mockDb.select.mockImplementationOnce(() => createChain(joined));
     mockDb.update.mockImplementationOnce(() => createChain([fakeProject]));
     mockDb.insert.mockImplementationOnce(() => createChain([]));
     const result = await svc.updateProjectProgress("p1", {
       progressPercentage: 50,
       message: "Half done",
     });
-    expect(result).toEqual(fakeProject);
+    expect(result).toEqual(enrichedProject);
   });
 });
 
 describe("getProjectByIdentifier", () => {
   test("returns project by code", async () => {
-    mockDb.select.mockImplementationOnce(() => createChain([fakeProject]));
+    mockDb.select.mockImplementationOnce(() =>
+      createChain([{ project: fakeProject, client: { name: "Client" } }])
+    );
     const result = await svc.getProjectByIdentifier("PRJ-ABC123");
     expect(result).toEqual(fakeProject);
   });

@@ -1,9 +1,17 @@
 import { describe, test, expect, mock, beforeEach } from "bun:test";
 
+const fullDept = {
+  id: "550e8400-e29b-41d4-a716-446655440000",
+  name: "Eng",
+  description: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
 const mockGetDepartments = mock(() => Promise.resolve({ data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1 } }));
-const mockGetDepartmentById = mock(() => Promise.resolve({ id: "d1", name: "Eng" }));
-const mockCreateDepartmentSvc = mock(() => Promise.resolve({ id: "d1" }));
-const mockUpdateDepartmentSvc = mock(() => Promise.resolve({ id: "d1" }));
+const mockGetDepartmentById = mock(() => Promise.resolve(fullDept));
+const mockCreateDepartmentSvc = mock(() => Promise.resolve(fullDept));
+const mockUpdateDepartmentSvc = mock(() => Promise.resolve(fullDept));
 const mockDeleteDepartmentSvc = mock(() => Promise.resolve());
 
 mock.module("../../../src/modules/departements/service.js", () => ({
