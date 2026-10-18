@@ -13,7 +13,7 @@ export const serviceParams = t.Object({
 export const serviceBody = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
   description: t.Optional(t.String({ maxLength: 500 })),
-  isActive: t.Optional(t.Boolean({ default: true })),
+  isActive: t.Optional(t.Boolean({ default: false })),
 });
 
 export type ServicePaginationQuery = typeof servicePaginationQuery.$infer;

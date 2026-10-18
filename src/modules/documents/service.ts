@@ -111,9 +111,19 @@ export const updateDocument = async (
 };
 
 export const deleteDocument = async (id: string): Promise<void> => {
-  const [result] = await db.delete(document).where(eq(document.id, id)).returning();
+  const [result] = await db
+    .delete(document)
+    .where(eq(document.id, id))
+    .returning({ id: document.id, fileKey: document.fileKey });
 
   if (!result) {
     throw NotFoundError("Document not found", "DOCUMENT_NOT_FOUND");
+  }
+
+  // Best-effort cleanup of the stored object so deletions don't leave orphans.
+  try {
+    await storageService.delete(result.fileKey);
+  } catch (err) {
+    console.error("DELETE DOCUMENT STORAGE ERROR", err);
   }
 };

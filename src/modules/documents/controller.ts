@@ -8,6 +8,7 @@ import {
   deleteDocument as deleteDocumentSvc,
 } from "./service.js";
 import { getPaginationParams } from "../../utils/pagination.js";
+import { getSessionFromHeaders } from "../auth/guard.js";
 import { storageService } from "../../utils/storage.js";
 import type {
   DocumentPaginationQuery,
@@ -30,7 +31,7 @@ export async function listDocuments(context: { query: DocumentPaginationQuery })
       projectId: context.query.projectId,
     });
     return successWithMeta(result.data, result.meta, "Documents retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve documents", "FETCH_DOCUMENTS_ERROR");
   }
 }
@@ -47,7 +48,7 @@ export async function getDocument(context: { params: DocumentParams }) {
   }
 }
 
-export async function createDocument(context: { body: DocumentBody }) {
+export async function createDocument(context: { body: DocumentBody; request?: Request }) {
   try {
     const body = context.body;
 
@@ -55,13 +56,18 @@ export async function createDocument(context: { body: DocumentBody }) {
       return error("File is required", "FILE_REQUIRED");
     }
 
+    // Never trust the client-supplied uploader: derive it from the session.
+    const session = context.request
+      ? await getSessionFromHeaders(context.request.headers)
+      : null;
+
     const buffer = Buffer.from(await body.file.arrayBuffer());
     const key = storageService.generateKey("documents", body.file.name);
     await storageService.upload(key, buffer, body.file.type);
 
     const document = await createDocumentSvc({
       projectId: body.projectId,
-      uploadedBy: body.uploadedBy,
+      uploadedBy: session?.user.id ?? body.uploadedBy,
       fileName: body.file.name,
       fileKey: key,
       mimeType: body.file.type,

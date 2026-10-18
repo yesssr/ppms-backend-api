@@ -22,7 +22,7 @@ export async function listUsers(context: { query: UserPaginationQuery }) {
     );
     const result = await getUsers({ page, limit });
     return successWithMeta(result.data, result.meta, "Users retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve users", "FETCH_USERS_ERROR");
   }
 }

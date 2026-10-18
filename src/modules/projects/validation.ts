@@ -20,7 +20,9 @@ export const projectParams = t.Object({
 
 export const projectBody = t.Object({
   serviceId: t.String({ format: "uuid" }),
-  createdBy: t.String(),
+  // Derived server-side from the authenticated session; kept optional for
+  // backward compatibility and always overridden.
+  createdBy: t.Optional(t.String()),
   name: t.String({ minLength: 1, maxLength: 150 }),
   clientId: t.String({ format: "uuid" }),
   description: t.Optional(t.String({ maxLength: 2000 })),

@@ -18,6 +18,18 @@ import type {
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp", "image/jfif"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
+// Best-effort removal of an orphaned cover image from object storage.
+const cleanupCover = async (url?: string | null) => {
+  if (!url) return;
+
+  try {
+    const key = storageService.keyFromPublicUrl(url);
+    if (key) await storageService.delete(key);
+  } catch (err) {
+    console.error("DELETE CASE STUDY COVER ERROR", err);
+  }
+};
+
 export async function listCaseStudies(context: { query: CaseStudyPaginationQuery }) {
   try {
     const { page, limit } = getPaginationParams(
@@ -30,7 +42,7 @@ export async function listCaseStudies(context: { query: CaseStudyPaginationQuery
       status: context.query.status,
     });
     return successWithMeta(result.data, result.meta, "Case studies retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve case studies", "FETCH_CASE_STUDIES_ERROR");
   }
 }
@@ -95,6 +107,13 @@ export async function updateCaseStudy(context: {
   try {
     const body = context.body;
 
+    // Remember the previous cover so it can be removed if replaced.
+    let previousCover: string | null = null;
+    if (body.coverImageFile) {
+      const existing = await getCaseStudyById(context.params.id);
+      previousCover = existing.coverImage ?? null;
+    }
+
     let coverImage = body.coverImage;
 
     if (body.coverImageFile) {
@@ -121,6 +140,11 @@ export async function updateCaseStudy(context: {
       tags: body.tags,
       publishedAt: body.publishedAt,
     });
+
+    if (previousCover && previousCover !== coverImage) {
+      await cleanupCover(previousCover);
+    }
+
     return success(caseStudy, "Case study updated successfully");
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {
@@ -135,7 +159,9 @@ export async function updateCaseStudy(context: {
 
 export async function deleteCaseStudy(context: { params: CaseStudyParams }) {
   try {
+    const existing = await getCaseStudyById(context.params.id);
     await deleteCaseStudySvc(context.params.id);
+    await cleanupCover(existing.coverImage);
     return success(null, "Case study deleted successfully");
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {

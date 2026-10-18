@@ -1,6 +1,6 @@
 import { db } from "../../db/index.js";
 import { caseStudy, NewCaseStudy, CaseStudy } from "./schema.js";
-import { eq, count, ilike, and } from "drizzle-orm";
+import { eq, count, and } from "drizzle-orm";
 import { NotFoundError } from "../../utils/errors.js";
 import {
   PaginationParams,

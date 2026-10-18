@@ -61,7 +61,7 @@ const upsertCredentialPassword = async (userId: string, email: string, password:
   } as any);
 };
 
-const seed = async () => {
+export const seed = async () => {
   for (const account of accounts) {
     const existing = await findByEmail(account.email);
 
@@ -98,10 +98,13 @@ const seed = async () => {
   }
 
   console.log("[seed] done");
-  process.exit(0);
 };
 
-seed().catch((err) => {
-  console.error("[seed] failed", err);
-  process.exit(1);
-});
+if (import.meta.main) {
+  seed()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("[seed] failed", err);
+      process.exit(1);
+    });
+}

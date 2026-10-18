@@ -6,7 +6,8 @@
     "start": "bun run src/index.ts",
     "test": "bun test --isolate",
     "dev": "bun run --watch src/index.ts",
-    "seed": "bun run src/db/seed.ts"
+    "seed": "bun run src/db/seed.ts",
+    "db:reset": "bun run src/db/reset.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1088.0",

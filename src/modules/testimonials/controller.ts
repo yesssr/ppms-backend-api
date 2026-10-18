@@ -27,7 +27,7 @@ export async function listTestimonials(context: { query: TestimonialPaginationQu
       status: context.query.status,
     });
     return successWithMeta(result.data, result.meta, "Testimonials retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve testimonials", "FETCH_TESTIMONIALS_ERROR");
   }
 }
@@ -48,7 +48,7 @@ export async function createTestimonial(context: { body: TestimonialBody }) {
   try {
     const testimonial = await createTestimonialSvc(context.body);
     return success(testimonial, "Testimonial created successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to create testimonial", "CREATE_TESTIMONIAL_ERROR");
   }
 }

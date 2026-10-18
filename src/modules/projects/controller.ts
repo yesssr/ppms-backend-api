@@ -45,7 +45,7 @@ export async function listProjects(context: { query: ProjectPaginationQuery }) {
       status: context.query.status,
     });
     return result;
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve projects", "FETCH_PROJECTS_ERROR");
   }
 }
@@ -62,9 +62,14 @@ export async function getProject(context: { params: ProjectParams }) {
   }
 }
 
-export async function createProject(context: { body: ProjectBody }) {
+export async function createProject(context: { body: ProjectBody; request?: Request }) {
   try {
     const body = context.body;
+
+    // Never trust the client-supplied creator: derive it from the session.
+    const session = context.request
+      ? await auth.api.getSession({ headers: context.request.headers })
+      : null;
 
     let thumbnail = body.thumbnail;
 
@@ -86,7 +91,7 @@ export async function createProject(context: { body: ProjectBody }) {
 
     const project = await createProjectSvc({
       serviceId: body.serviceId,
-      createdBy: body.createdBy,
+      createdBy: session?.user.id ?? body.createdBy!,
       name: body.name,
       clientId: body.clientId,
       description: body.description,

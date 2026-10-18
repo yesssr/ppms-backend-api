@@ -2,7 +2,7 @@ import { pgTable, uuid, text, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const technology = pgTable("technology", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
+  name: text("name").notNull().unique(),
   category: text("category").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

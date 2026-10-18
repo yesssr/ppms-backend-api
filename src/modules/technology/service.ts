@@ -1,7 +1,7 @@
 import { db } from "../../db/index.js";
 import { Technology, NewTechnology, technology } from "./schema.js";
 import { eq, count, ilike, and } from "drizzle-orm";
-import { NotFoundError, ConflictError } from "../../utils/errors.js";
+import { NotFoundError } from "../../utils/errors.js";
 import {
   PaginationParams,
   PaginatedResult,

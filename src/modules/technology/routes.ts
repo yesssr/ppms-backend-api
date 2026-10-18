@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import { t } from "elysia";
 import * as ctrl from "./controller.js";
 import {
   technologyPaginationQuery,

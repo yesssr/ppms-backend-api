@@ -1,5 +1,4 @@
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 export const departments = pgTable("departments", {
   id: uuid("id").primaryKey().defaultRandom(),

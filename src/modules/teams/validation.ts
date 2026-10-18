@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import type { NewTeam, NewTeamMember } from "./schema.js";
 
 export const teamPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),

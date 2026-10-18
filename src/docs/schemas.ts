@@ -23,7 +23,7 @@ const enumUnion = (values: readonly string[]) =>
 export const errorSchema = t.Object(
   {
     message: t.String(),
-    code: t.String(),
+    code: t.Optional(t.String()),
     details: t.Optional(t.Any()),
   },
   { description: "Error payload returned when a request fails" }
@@ -48,15 +48,18 @@ export const success = (data: TSchema): any =>
     success: t.Boolean({ description: "Always true on success" }),
     data,
     message: t.String({ description: "Human-readable status message" }),
-    error: t.Any({ description: "null on success" }),
+    error: t.Optional(t.Any({ description: "null on success" })),
     meta: t.Optional(t.Any()),
   });
 
-// Build a paginated list response (matches the actual `paginate()` return shape
-// used by list controllers: { data: T[], meta }).
+// Build a paginated list response (matches the `successWithMeta()` return shape
+// used by list controllers: { success, data: T[], message, meta }).
 export const listResult = (item: TSchema): any =>
   t.Object({
+    success: t.Boolean({ description: "Always true on success" }),
     data: t.Array(item),
+    message: t.String({ description: "Human-readable status message" }),
+    error: t.Optional(t.Any({ description: "null on success" })),
     meta: metaSchema,
   });
 
@@ -67,17 +70,30 @@ export const successList = (item: TSchema): any =>
     success: t.Boolean({ description: "Always true on success" }),
     data: t.Array(item),
     message: t.String({ description: "Human-readable status message" }),
-    error: t.Any({ description: "null on success" }),
+    error: t.Optional(t.Any({ description: "null on success" })),
     meta: t.Optional(t.Any()),
   });
 
+// Matches the shape produced by `error()` in utils/response.ts.
 export const errorResponse: any = t.Object({
   success: t.Boolean({ description: "Always false on failure" }),
-  data: t.Any(),
-  message: t.String({ description: "Human-readable error message" }),
   error: errorSchema,
+  data: t.Optional(t.Any()),
+  message: t.Optional(t.String({ description: "Human-readable error message" })),
   meta: t.Optional(t.Any()),
 });
+
+// Routes must accept BOTH the success and error envelope, otherwise Elysia
+// validates error responses against the success schema and turns every handled
+// error into a 422 validation payload.
+export const apiResponse = (data: TSchema): any =>
+  t.Union([success(data), errorResponse]);
+
+export const apiListResponse = (item: TSchema): any =>
+  t.Union([listResult(item), errorResponse]);
+
+export const apiSuccessList = (item: TSchema): any =>
+  t.Union([successList(item), errorResponse]);
 
 // ---------------------------------------------------------------------------
 // Entity response schemas (mirror of DB columns)
@@ -210,10 +226,10 @@ export const caseStudySchema = t.Object({
   id: t.String(),
   projectId: t.String(),
   title: t.String(),
-  slug: t.Union([t.String(), t.Null()]),
-  challenge: t.Union([t.String(), t.Null()]),
-  solution: t.Union([t.String(), t.Null()]),
-  outcome: t.Union([t.String(), t.Null()]),
+  slug: t.String(),
+  challenge: t.String(),
+  solution: t.String(),
+  outcome: t.String(),
   coverImage: t.Union([t.String(), t.Null()]),
   status: enumUnion(CONTENT_STATUS),
   tags: t.Union([t.String(), t.Null()]),

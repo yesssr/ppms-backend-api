@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import type { NewClient } from "./schema.js";
 
 export const clientPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),

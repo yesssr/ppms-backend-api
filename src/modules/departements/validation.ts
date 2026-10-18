@@ -1,5 +1,4 @@
 import { t } from "elysia";
-import type { NewDepartment } from "./schema.js";
 
 export const departmentPaginationQuery = t.Object({
   page: t.Optional(t.Number({ minimum: 1, default: 1 })),

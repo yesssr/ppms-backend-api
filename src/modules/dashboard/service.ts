@@ -4,7 +4,7 @@ import { services } from "../services/schema.js";
 import { technology } from "../technology/schema.js";
 import { clients } from "../clients/schema.js";
 import { testimonial } from "../testimonials/schema.js";
-import { eq, count, sql, and, desc, inArray } from "drizzle-orm";
+import { eq, count, sql, desc, inArray } from "drizzle-orm";
 import type {
   DashboardResponse,
   TimelineTrend,

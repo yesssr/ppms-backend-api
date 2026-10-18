@@ -20,7 +20,9 @@ export const documentParams = t.Object({
 
 export const documentBody = t.Object({
   projectId: t.String({ format: "uuid" }),
-  uploadedBy: t.String(),
+  // Derived server-side from the authenticated session; kept optional for
+  // backward compatibility and always overridden.
+  uploadedBy: t.Optional(t.String()),
   file: t.File(),
   category: enumUnion(DOCUMENT_CATEGORY),
 });

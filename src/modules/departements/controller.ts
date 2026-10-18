@@ -6,7 +6,6 @@ import {
   updateDepartment as updateDepartmentSvc,
   deleteDepartment as deleteDepartmentSvc,
 } from "./service.js";
-import type { NewDepartment } from "./schema.js";
 import { getPaginationParams } from "../../utils/pagination.js";
 import type {
   DepartmentPaginationQuery,
@@ -27,7 +26,7 @@ export async function listDepartments(context: { query: DepartmentPaginationQuer
       result.meta,
       "Departments retrieved successfully"
     );
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve departments", "FETCH_DEPARTMENTS_ERROR");
   }
 }

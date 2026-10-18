@@ -6,6 +6,7 @@ import {
   updateTask as updateTaskSvc,
   deleteTask as deleteTaskSvc,
 } from "./service.js";
+import { getSessionFromHeaders } from "../auth/guard.js";
 import { getPaginationParams } from "../../utils/pagination.js";
 import type {
   TaskPaginationQuery,
@@ -27,7 +28,7 @@ export async function listTasks(context: { query: TaskPaginationQuery }) {
       projectId: context.query.projectId,
     });
     return successWithMeta(result.data, result.meta, "Tasks retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve tasks", "FETCH_TASKS_ERROR");
   }
 }
@@ -44,9 +45,16 @@ export async function getTask(context: { params: TaskParams }) {
   }
 }
 
-export async function createTask(context: { body: TaskBody }) {
+export async function createTask(context: { body: TaskBody; request?: Request }) {
   try {
-    const task = await createTaskSvc(context.body);
+    // Never trust the client-supplied creator: derive it from the session.
+    const session = context.request
+      ? await getSessionFromHeaders(context.request.headers)
+      : null;
+    const task = await createTaskSvc({
+      ...context.body,
+      createdBy: session?.user.id ?? context.body.createdBy,
+    });
     return success(task, "Task created successfully");
   } catch (err) {
     if (err instanceof Error && err.message.includes("not found")) {

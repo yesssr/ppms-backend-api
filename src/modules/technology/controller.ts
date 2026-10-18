@@ -28,7 +28,7 @@ export async function listTechnologies(context: { query: TechnologyPaginationQue
       category: context.query.category,
     });
     return successWithMeta(result.data, result.meta, "Technologies retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve technologies", "FETCH_TECHNOLOGIES_ERROR");
   }
 }

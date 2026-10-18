@@ -7,7 +7,7 @@ import {
   NewTeamMember,
   TeamMember,
 } from "./schema.js";
-import { eq, count, and, sql } from "drizzle-orm";
+import { eq, count, and } from "drizzle-orm";
 import { NotFoundError } from "../../utils/errors.js";
 import {
   PaginationParams,

@@ -11,6 +11,7 @@ export interface StorageService {
   upload(key: string, buffer: Buffer, mimeType: string): Promise<string>;
   delete(key: string): Promise<void>;
   getPublicUrl(key: string): string;
+  keyFromPublicUrl(url: string | null | undefined): string | null;
   generateKey(prefix: string, filename: string): string;
   generateSignedUrl(key: string, expiresInSeconds?: number): Promise<string>;
 }
@@ -44,6 +45,16 @@ export class TigrisStorageService implements StorageService {
 
   getPublicUrl(key: string): string {
     return `${this.publicUrl}/${key}`;
+  }
+
+  // Derives the object key from a previously returned public URL, or null when
+  // the URL does not belong to this bucket (e.g. an external image).
+  keyFromPublicUrl(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const prefix = `${this.publicUrl}/`;
+    if (!url.startsWith(prefix)) return null;
+    const key = url.slice(prefix.length);
+    return key.length > 0 ? key : null;
   }
 
   async generateSignedUrl(

@@ -20,7 +20,9 @@ export const taskParams = t.Object({
 export const taskBody = t.Object({
   projectId: t.String({ format: "uuid" }),
   assigneeId: t.String(),
-  createdBy: t.String(),
+  // `createdBy` is derived server-side from the authenticated session; it is
+  // accepted here only for backward compatibility and is always overridden.
+  createdBy: t.Optional(t.String()),
   title: t.String({ minLength: 1, maxLength: 150 }),
   description: t.Optional(t.String({ maxLength: 2000 })),
   priority: enumUnion(TASK_PRIORITY),

@@ -5,12 +5,11 @@ import {
   projectTechnology,
   projectLog,
   NewProject,
-  Project,
   ProjectLog,
   ProjectWithClient,
 } from "./schema.js";
-import { eq, count, and, sql, inArray, ilike, or } from "drizzle-orm";
-import { NotFoundError, ConflictError } from "../../utils/errors.js";
+import { eq, count, and, inArray, ilike, or } from "drizzle-orm";
+import { NotFoundError } from "../../utils/errors.js";
 import {
   PaginationParams,
   PaginatedResult,
@@ -24,19 +23,6 @@ import { user } from "../auth/schema.js";
 import { technology } from "../technology/schema.js";
 
 export type { Project, NewProject, ProjectWithClient } from "./schema.js";
-
-const withClient = async (p: Project): Promise<ProjectWithClient> => {
-  const [clientRow] = await db
-    .select()
-    .from(clients)
-    .where(eq(clients.id, p.clientId))
-    .limit(1);
-
-  return {
-    ...p,
-    clientName: clientRow?.name ?? null,
-  };
-};
 
 export const getProjects = async (
   params: PaginationParams & {

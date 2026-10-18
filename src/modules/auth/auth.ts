@@ -16,7 +16,7 @@ export const auth = betterAuth({
       ? [config.app.FRONTEND_URL, config.app.BACKEND_URL]
       : [config.app.FRONTEND_URL, config.app.BACKEND_URL, "*"],
   advanced: {
-    disableCSRFCheck: config.app.NODE_ENV !== "production", // menonaktifkan pengecekan Origin jika bukan di production
+    disableCSRFCheck: config.app.NODE_ENV !== "production", // disable the Origin check outside production
   },
   secret: config.auth.betterAuthSecret,
   emailAndPassword: {

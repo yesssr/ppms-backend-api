@@ -5,7 +5,7 @@ export async function getDashboardData() {
   try {
     const data = await getDashboard();
     return success(data, "Dashboard data retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve dashboard data", "FETCH_DASHBOARD_ERROR");
   }
 }

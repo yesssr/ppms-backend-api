@@ -9,7 +9,6 @@ import {
   addTeamMember as addTeamMemberSvc,
   removeTeamMember as removeTeamMemberSvc,
 } from "./service.js";
-import type { NewTeam } from "./schema.js";
 import { getPaginationParams } from "../../utils/pagination.js";
 import type {
   TeamPaginationQuery,
@@ -27,7 +26,7 @@ export async function listTeams(context: { query: TeamPaginationQuery }) {
     );
     const result = await getTeams({ page, limit });
     return successWithMeta(result.data, result.meta, "Teams retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve teams", "FETCH_TEAMS_ERROR");
   }
 }
@@ -90,7 +89,7 @@ export async function listTeamMembers(context: { params: TeamParams }) {
   try {
     const members = await getTeamMembers(context.params.id);
     return success(members, "Team members retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve team members", "FETCH_TEAM_MEMBERS_ERROR");
   }
 }

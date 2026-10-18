@@ -194,16 +194,3 @@ export const deleteUser = async (id: string): Promise<void> => {
     throw NotFoundError("User not found", "USER_NOT_FOUND");
   }
 };
-
-export const getUserTeams = async (userId: string) => {
-  const result = await db
-    .select({ team: require("../teams/schema.js").team })
-    .from(teamMember)
-    .innerJoin(
-      require("../teams/schema.js").team,
-      eq(teamMember.teamId, require("../teams/schema.js").team.id)
-    )
-    .where(eq(teamMember.userId, userId));
-
-  return result.map((t) => t.team);
-};

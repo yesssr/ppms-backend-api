@@ -26,7 +26,7 @@ export async function listServices(context: { query: ServicePaginationQuery }) {
       search: context.query.search,
     });
     return successWithMeta(result.data, result.meta, "Services retrieved successfully");
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve services", "FETCH_SERVICES_ERROR");
   }
 }

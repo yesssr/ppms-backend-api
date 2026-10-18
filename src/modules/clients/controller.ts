@@ -30,7 +30,7 @@ export async function listClients(context: { query: ClientPaginationQuery }) {
       result.meta,
       "Clients retrieved successfully"
     );
-  } catch (err) {
+  } catch {
     return error("Failed to retrieve clients", "FETCH_CLIENTS_ERROR");
   }
 }

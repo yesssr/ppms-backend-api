@@ -74,7 +74,7 @@ export const teamRoutes = new Elysia({ name: "teams", prefix: "/api/teams" })
   .post("/:id/members", ctrl.addTeamMember, {
     params: teamParams,
     body: addMemberBody,
-    response: responses.teamMemberList,
+    response: responses.teamMember,
     detail: {
       tags: ["Teams"],
       summary: "Add a team member",
@@ -85,7 +85,7 @@ export const teamRoutes = new Elysia({ name: "teams", prefix: "/api/teams" })
   .delete("/:id/members", ctrl.removeTeamMember, {
     params: teamParams,
     body: addMemberBody,
-    response: responses.teamMemberList,
+    response: responses.deleted,
     detail: {
       tags: ["Teams"],
       summary: "Remove a team member",

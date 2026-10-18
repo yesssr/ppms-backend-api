@@ -56,6 +56,13 @@
       "version": "8",
       "tag": "0008_calm_zeus",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792312554596,
+      "tag": "0009_unique_client_technology_names",
+      "breakpoints": true
     }
   ]
 }

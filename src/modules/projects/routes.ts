@@ -9,34 +9,38 @@ import {
   updateProjectProgressBody,
 } from "./validation.js";
 import { responses } from "../../docs/openapi.js";
+import { errorResponse } from "../../docs/schemas.js";
 
 export const projectRoutes = new Elysia({ name: "projects", prefix: "/api/projects" })
   // Public tracking endpoint (resi-style) for clients — no auth required.
   .get("/track/:code", ctrl.trackProject, {
     params: t.Object({ code: t.String() }),
-    response: t.Object({
-      success: t.Boolean(),
-      data: t.Object({
-        name: t.String(),
-        clientName: t.String(),
-        status: t.String(),
-        progressPercentage: t.Number(),
-        lastChange: t.Date(),
-        logs: t.Array(
-          t.Object({
-            id: t.String({ format: "uuid" }),
-            projectId: t.String({ format: "uuid" }),
-            progressPercentage: t.Number(),
-            message: t.Union([t.String(), t.Null()]),
-            updatedBy: t.Union([t.String(), t.Null()]),
-            createdAt: t.Date(),
-          })
-        ),
+    response: t.Union([
+      t.Object({
+        success: t.Boolean(),
+        data: t.Object({
+          name: t.String(),
+          clientName: t.Union([t.String(), t.Null()]),
+          status: t.String(),
+          progressPercentage: t.Number(),
+          lastChange: t.Date(),
+          logs: t.Array(
+            t.Object({
+              id: t.String({ format: "uuid" }),
+              projectId: t.String({ format: "uuid" }),
+              progressPercentage: t.Number(),
+              message: t.Union([t.String(), t.Null()]),
+              updatedBy: t.Union([t.String(), t.Null()]),
+              createdAt: t.Date(),
+            })
+          ),
+        }),
+        message: t.String(),
+        error: t.Optional(t.Any()),
+        meta: t.Optional(t.Any()),
       }),
-      message: t.String(),
-      error: t.Any(),
-      meta: t.Optional(t.Any()),
-    }) as any,
+      errorResponse,
+    ]) as any,
     detail: {
       tags: ["Tracking"],
       summary: "Track project progress (public)",
