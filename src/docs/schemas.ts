@@ -281,6 +281,16 @@ export const taskSchema = t.Object({
   dueDate: t.Union([t.String(), t.Null()]),
   createdAt: t.Date(),
   updatedAt: t.Date(),
+  assignee: t.Optional(
+    t.Union([
+      t.Object({
+        id: t.String(),
+        name: t.String(),
+        email: t.String(),
+      }),
+      t.Null(),
+    ])
+  ),
 });
 
 export const dashboardSummarySchema = t.Object({

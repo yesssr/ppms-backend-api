@@ -1,5 +1,6 @@
 import { db } from "../../db/index.js";
 import { task, NewTask, Task } from "./schema.js";
+import { user } from "../auth/schema.js";
 import { eq, count, ilike, and } from "drizzle-orm";
 import { NotFoundError } from "../../utils/errors.js";
 import {
@@ -11,9 +12,13 @@ import {
 
 export type { Task, NewTask } from "./schema.js";
 
+export type TaskWithAssignee = Task & {
+  assignee: { id: string; name: string; email: string } | null;
+};
+
 export const getTasks = async (
   params: PaginationParams & { search?: string; projectId?: string }
-): Promise<PaginatedResult<Task>> => {
+): Promise<PaginatedResult<TaskWithAssignee>> => {
   const offset = getPaginationOffset(params.page, params.limit);
 
   const conditions = [];
@@ -29,23 +34,62 @@ export const getTasks = async (
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [items, countResult] = await Promise.all([
-    db.select().from(task).where(whereClause).limit(params.limit).offset(offset),
+    db
+      .select({
+        task,
+        assigneeId: user.id,
+        assigneeName: user.name,
+        assigneeEmail: user.email,
+      })
+      .from(task)
+      .leftJoin(user, eq(task.assigneeId, user.id))
+      .where(whereClause)
+      .limit(params.limit)
+      .offset(offset),
     db.select({ count: count() }).from(task).where(whereClause),
   ]);
 
+  const data: TaskWithAssignee[] = items.map(
+    ({ task, assigneeId, assigneeName, assigneeEmail }) => ({
+      ...task,
+      assignee: assigneeId
+        ? { id: assigneeId, name: assigneeName!, email: assigneeEmail! }
+        : null,
+    })
+  );
+
   const total = Number(countResult[0]?.count ?? 0);
 
-  return paginate(items, total, params);
+  return paginate(data, total, params);
 };
 
-export const getTaskById = async (id: string): Promise<Task> => {
-  const [result] = await db.select().from(task).where(eq(task.id, id)).limit(1);
+export const getTaskById = async (id: string): Promise<TaskWithAssignee> => {
+  const [result] = await db
+    .select({
+      task,
+      assigneeId: user.id,
+      assigneeName: user.name,
+      assigneeEmail: user.email,
+    })
+    .from(task)
+    .leftJoin(user, eq(task.assigneeId, user.id))
+    .where(eq(task.id, id))
+    .limit(1);
 
   if (!result) {
     throw NotFoundError("Task not found", "TASK_NOT_FOUND");
   }
 
-  return result;
+  return {
+    ...result.task,
+    assignee: result.assigneeId
+      ? {
+          id: result.assigneeId,
+          name: result.assigneeName!,
+          email: result.assigneeEmail!,
+        }
+      : null,
+  };
 };
 
 export const createTask = async (data: NewTask): Promise<Task> => {

@@ -32,6 +32,8 @@ export const taskBody = t.Object({
 });
 
 export const updateTaskBody = t.Object({
+  projectId: t.Optional(t.String({ format: "uuid" })),
+  assigneeId: t.Optional(t.String()),
   title: t.Optional(t.String({ minLength: 1, maxLength: 150 })),
   description: t.Optional(t.String({ maxLength: 2000 })),
   priority: t.Optional(enumUnion(TASK_PRIORITY)),

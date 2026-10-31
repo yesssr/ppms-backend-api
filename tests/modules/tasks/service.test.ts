@@ -12,23 +12,31 @@ beforeEach(() => {
 });
 
 const fakeTask = { id: "t1", title: "Task 1", projectId: "p1", status: "todo" };
+const fakeAssignee = { id: "u1", name: "Developer LEXA", email: "developer@lexa.com" };
+const fakeTaskRow = {
+  task: fakeTask,
+  assigneeId: fakeAssignee.id,
+  assigneeName: fakeAssignee.name,
+  assigneeEmail: fakeAssignee.email,
+};
+const fakeTaskWithAssignee = { ...fakeTask, assignee: fakeAssignee };
 
 describe("getTasks", () => {
   test("returns paginated tasks", async () => {
     mockDb.select
-      .mockImplementationOnce(() => createChain([fakeTask]))
+      .mockImplementationOnce(() => createChain([fakeTaskRow]))
       .mockImplementationOnce(() => createChain([{ count: 1 }]));
     const result = await svc.getTasks({ page: 1, limit: 10 });
-    expect(result.data).toEqual([fakeTask]);
+    expect(result.data).toEqual([fakeTaskWithAssignee]);
     expect(result.meta.total).toBe(1);
   });
 });
 
 describe("getTaskById", () => {
   test("returns task when found", async () => {
-    mockDb.select.mockImplementationOnce(() => createChain([fakeTask]));
+    mockDb.select.mockImplementationOnce(() => createChain([fakeTaskRow]));
     const result = await svc.getTaskById("t1");
-    expect(result).toEqual(fakeTask);
+    expect(result).toEqual(fakeTaskWithAssignee);
   });
 
   test("throws NotFoundError when not found", async () => {
