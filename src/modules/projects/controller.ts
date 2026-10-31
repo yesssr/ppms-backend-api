@@ -1,4 +1,4 @@
-import { success, error } from "../../utils/response.js";
+import { success, successWithMeta, error } from "../../utils/response.js";
 import { auth } from "../auth/auth.js";
 import {
   getProjects,
@@ -44,7 +44,11 @@ export async function listProjects(context: { query: ProjectPaginationQuery }) {
       serviceId: context.query.serviceId,
       status: context.query.status,
     });
-    return result;
+    return successWithMeta(
+      result.data,
+      result.meta,
+      "Projects retrieved successfully"
+    );
   } catch {
     return error("Failed to retrieve projects", "FETCH_PROJECTS_ERROR");
   }
