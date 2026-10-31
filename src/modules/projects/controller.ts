@@ -188,6 +188,7 @@ export async function updateProjectProgress(context: {
     const project = await updateProjectProgressSvc(context.params.id, {
       progressPercentage: context.body.progressPercentage,
       message: context.body.message,
+      status: context.body.status,
       updatedBy: session?.user.id,
     });
     return success(project, "Project progress updated successfully");

@@ -110,7 +110,7 @@ export const projectRoutes = new Elysia({ name: "projects", prefix: "/api/projec
       tags: ["Projects"],
       summary: "Update project progress",
       description:
-        "Developer updates the project's progress percentage. Updates `progressPercentage` + `lastChange` and appends a `project_log` entry (resi-style history). **Developer.**",
+        "Developer updates the project's progress percentage and optionally its status. Updates `progressPercentage`, `status` (when provided), `lastChange`, and appends a `project_log` entry (resi-style history). **Developer.**",
       security: [{ sessionCookie: [] }],
     },
   })

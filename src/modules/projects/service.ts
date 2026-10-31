@@ -271,6 +271,7 @@ export const updateProjectProgress = async (
   data: {
     progressPercentage: number;
     message?: string;
+    status?: string;
     updatedBy?: string;
   }
 ): Promise<ProjectWithClient> => {
@@ -278,6 +279,7 @@ export const updateProjectProgress = async (
     .update(project)
     .set({
       progressPercentage: data.progressPercentage,
+      ...(data.status ? { status: data.status } : {}),
       lastChange: new Date(),
     })
     .where(eq(project.id, id))

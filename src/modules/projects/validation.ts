@@ -60,6 +60,8 @@ export const updateProjectBody = t.Object({
 export const updateProjectProgressBody = t.Object({
   progressPercentage: t.Number({ minimum: 0, maximum: 100 }),
   message: t.Optional(t.String({ maxLength: 1000 })),
+  // Developers may move a project between statuses while updating progress.
+  status: t.Optional(enumUnion(PROJECT_STATUS)),
 });
 
 export type ProjectPaginationQuery = typeof projectPaginationQuery.$infer;
